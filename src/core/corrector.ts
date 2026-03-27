@@ -154,6 +154,59 @@ export function parseLLMResponse(raw: string): Correction[] {
   }
 }
 
+// ─── Build Diff HTML ───────────────────────────────────────────────────────
+// Produces an HTML string with <del class="writeai-del"> / <ins class="writeai-ins"> spans.
+// Keeps the LEFTMOST of any overlapping corrections for display.
+// Note: applyCorrections() keeps the RIGHTMOST — in the rare overlap case the
+// accepted text may differ slightly from what was shown. This is an edge case.
+
+function htmlEscape(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
+export function buildDiffHtml(text: string, corrections: Correction[]): string {
+  interface DisplaySpan {
+    start: number
+    end: number
+    original: string
+    replacement: string
+  }
+
+  const spans: DisplaySpan[] = []
+  for (const c of corrections) {
+    const start = text.indexOf(c.original)
+    if (start === -1) continue
+    spans.push({ start, end: start + c.original.length, original: c.original, replacement: c.replacement })
+  }
+
+  // Sort left-to-right, keep leftmost on overlap
+  spans.sort((a, b) => a.start - b.start)
+  const deduped: DisplaySpan[] = []
+  let prevEnd = 0
+  for (const span of spans) {
+    if (span.start >= prevEnd) {
+      deduped.push(span)
+      prevEnd = span.end
+    }
+  }
+
+  let html = ""
+  let cursor = 0
+  for (let i = 0; i < deduped.length; i++) {
+    const span = deduped[i]
+    html += htmlEscape(text.slice(cursor, span.start))
+    html += `<del class="writeai-del" data-idx="${i}">${htmlEscape(span.original)}</del>`
+    html += `<ins class="writeai-ins" data-idx="${i}">${htmlEscape(span.replacement)}</ins>`
+    cursor = span.end
+  }
+  html += htmlEscape(text.slice(cursor))
+  return html
+}
+
 // ─── Apply Corrections ─────────────────────────────────────────────────────
 
 interface Span {
