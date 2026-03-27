@@ -52,10 +52,13 @@ const ROOT_STYLE = `
 
   body {
     width: 360px;
-    max-height: 600px;
+    background: var(--bg);
+  }
+
+  #popup-root {
     display: flex;
     flex-direction: column;
-    background: var(--bg);
+    height: 580px;
     overflow: hidden;
   }
 
@@ -503,12 +506,12 @@ export default function Popup() {
 
   if (!hasOnboarded) {
     return (
-      <>
+      <div id="popup-root">
         <style dangerouslySetInnerHTML={{ __html: ROOT_STYLE }} />
         {Header}
         <div className="divider" />
 
-        <div className="onboarding-wrap">
+        <div className="onboarding-wrap" style={{ overflowY: "auto", flex: 1 }}>
           {/* Progress dots */}
           <div className="onboarding-progress">
             {[1, 2, 3].map(n => (
@@ -626,14 +629,14 @@ export default function Popup() {
             </>
           )}
         </div>
-      </>
+      </div>
     )
   }
 
   // ── Normal settings view ───────────────────────────────────────────────
 
   return (
-    <>
+    <div id="popup-root">
       <style dangerouslySetInnerHTML={{ __html: ROOT_STYLE }} />
 
       {Header}
@@ -823,7 +826,7 @@ export default function Popup() {
       </div>
 
       </div>{/* end #popup-scroll */}
-    </>
+    </div>
   )
 }
 
