@@ -13,7 +13,7 @@
 
 ## Typography
 - **UI / Labels / Body:** Inter — excellent readability at 11–14px, widely available, neutral without being generic. Used for all popup text, button labels, overlay headers, and Teaching Mode reason text.
-- **Diff spans (del/ins) only:** JetBrains Mono — creates a distinct visual register: monospace = "computer correction", Inter = "human explanation". Mirrors the code review mental model of the v1 developer user. This is the key design risk that gives WriteAI its identity.
+- **Diff spans (del/ins) only:** JetBrains Mono — creates a distinct visual register: monospace = "computer correction", Inter = "human explanation". The typographic contrast signals "this is a machine suggestion" vs "this is an explanation" for any user, regardless of technical background. This is the key design risk that gives WriteAI its identity.
 - **Loading:** Google Fonts CDN — `https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap`
 - **Scale:**
   ```
@@ -29,34 +29,42 @@
 
 ### Light Mode
 ```css
---surface:    #ffffff   /* overlay panel, popup background */
---surface-2:  #f8fafc   /* overlay footer, popup section backgrounds */
---border:     #e2e8f0
---text:       #1a1a1a
---muted:      #6b7280   /* reason text, labels, placeholders */
---accent:     #2563eb   /* primary buttons, focus rings, badges */
+--bg:           #ffffff   /* primary background: overlay panel, popup body */
+--surface:      #f8fafc   /* secondary background: section fills, card backgrounds */
+--border:       #e2e8f0
+--text-primary: #0f172a
+--text-secondary: #475569
+--muted:        #94a3b8   /* reason text, labels, placeholders */
+--accent:       #2563eb   /* primary buttons, focus rings, badges */
 --accent-hover: #1d4ed8
---error:      #dc2626
---success:    #16a34a
---del-bg:     #fee2e2
---del-text:   #991b1b
---ins-bg:     #dcfce7
---ins-text:   #166534
+--error:        #dc2626
+--success:      #16a34a
+--del-bg:       #fee2e2
+--del-text:     #991b1b
+--ins-bg:       #dcfce7
+--ins-text:     #166534
+--radius-sm:    4px        /* buttons, inputs, badges */
+--radius-md:    8px        /* cards, panels */
+--radius-lg:    12px       /* overlay panel (shadow DOM only) */
 ```
 
 ### Dark Mode (CSS media query inside shadow DOM)
 ```css
 @media (prefers-color-scheme: dark) {
-  --surface:    #1e1e1e
-  --surface-2:  #252525
-  --border:     #333333
-  --text:       #f0f0f0
-  --muted:      #9ca3af
-  /* accent, error, success unchanged */
-  --del-bg:     #4c0e0e
-  --del-text:   #fca5a5
-  --ins-bg:     #0d2e1a
-  --ins-text:   #86efac
+  --bg:           #1e293b   /* Slate 900 */
+  --surface:      #0f172a   /* Slate 950 */
+  --border:       #334155
+  --text-primary: #f1f5f9
+  --text-secondary: #94a3b8
+  --muted:        #64748b
+  --accent:       #3b82f6
+  --accent-hover: #60a5fa
+  --success:      #4ade80
+  --error:        #f87171
+  --del-bg:       #450a0a
+  --del-text:     #fca5a5
+  --ins-bg:       #052e16
+  --ins-text:     #86efac
 }
 ```
 
@@ -134,7 +142,7 @@ box-shadow: 0 4px 16px rgba(0,0,0,0.4);   /* dark */
 ## Decisions Log
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-03-24 | Inter + JetBrains Mono typography split | Mono for diffs only creates code-review mental model for v1 developer users |
+| 2026-03-24 | Inter + JetBrains Mono typography split | Mono = machine suggestion, Inter = human explanation — works for all users, not just developers |
 | 2026-03-24 | Teaching Mode always visible (not toggleable) | The reason text IS the product differentiator; hiding it removes the core value |
 | 2026-03-24 | Overlay adjacent to textarea, not inside it | Prevents visual conflict with email body content; works across all hostnames |
 | 2026-03-24 | Blue accent (#2563eb) | Trust signal for productivity/professional tools; matches Chrome UI conventions |
