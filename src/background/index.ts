@@ -74,7 +74,9 @@ async function handleCheckText(
       // fetch() network failure
       return { error: "No internet connection." }
     }
-    return { error: "API request failed." }
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error("[WriteAI] API error:", msg)
+    return { error: `API request failed: ${msg}` }
   } finally {
     abortControllers.delete(tabId)
   }

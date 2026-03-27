@@ -1,4 +1,4 @@
-# WriteAI
+# WriteIAit
 
 A Chrome extension that corrects English grammar for non-native speakers — and explains *why* each correction was made.
 

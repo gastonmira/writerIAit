@@ -1,6 +1,6 @@
 {
   "ext_name": {
-    "message": "WriteAI",
+    "message": "WriteIAit",
     "description": "Extension name"
   },
   "ext_description": {
@@ -62,5 +62,61 @@
   "top_fix": {
     "message": "Corrección más frecuente",
     "description": "Most common correction category in popup"
+  },
+  "onboarding_choose_provider": {
+    "message": "Elige tu proveedor de IA",
+    "description": "Step 1 headline in onboarding wizard"
+  },
+  "onboarding_provider_sub": {
+    "message": "Gemini y Groq son gratuitos — sin tarjeta de crédito.",
+    "description": "Step 1 subtitle"
+  },
+  "onboarding_language_optional": {
+    "message": "Tu idioma nativo (opcional)",
+    "description": "Language selector label in Step 1"
+  },
+  "onboarding_skip": {
+    "message": "¿Ya lo configuraste? Omitir →",
+    "description": "Skip link on Step 1"
+  },
+  "onboarding_add_key": {
+    "message": "Añade tu clave de API",
+    "description": "Step 2 headline"
+  },
+  "onboarding_key_sub": {
+    "message": "Las claves se guardan localmente y nunca salen de tu dispositivo.",
+    "description": "Step 2 subtitle"
+  },
+  "onboarding_key_empty": {
+    "message": "Por favor pega tu clave de API antes de continuar.",
+    "description": "Inline validation error on Step 2"
+  },
+  "onboarding_save_continue": {
+    "message": "Guardar y continuar →",
+    "description": "Step 2 primary button"
+  },
+  "onboarding_back": {
+    "message": "← Atrás",
+    "description": "Back navigation link in wizard"
+  },
+  "onboarding_done_headline": {
+    "message": "Todo listo.",
+    "description": "Step 3 headline"
+  },
+  "onboarding_done_sub": {
+    "message": "WriteIAit está activo en todas las páginas.",
+    "description": "Step 3 subtitle"
+  },
+  "onboarding_shortcut_helper": {
+    "message": "Enfoca cualquier campo de texto y presiona este atajo para revisar tu inglés.",
+    "description": "Step 3 shortcut helper text"
+  },
+  "onboarding_teaching_note": {
+    "message": "El Modo Enseñanza siempre está activado — cada corrección incluye una explicación del porqué.",
+    "description": "Teaching Mode note in Step 3"
+  },
+  "onboarding_start_writing": {
+    "message": "Comenzar a escribir →",
+    "description": "Step 3 primary button"
   }
 }
