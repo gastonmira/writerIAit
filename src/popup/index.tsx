@@ -50,7 +50,19 @@ const ROOT_STYLE = `
     }
   }
 
-  body { width: 360px; background: var(--bg); }
+  body {
+    width: 360px;
+    max-height: 600px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  #popup-scroll {
+    overflow-y: auto;
+    flex: 1;
+  }
 
   label {
     display: block;
@@ -626,6 +638,8 @@ export default function Popup() {
 
       {Header}
 
+      <div id="popup-scroll">
+
       <div className="divider" />
 
       {/* Preferences */}
@@ -807,6 +821,8 @@ export default function Popup() {
           </div>
         </div>
       </div>
+
+      </div>{/* end #popup-scroll */}
     </>
   )
 }
