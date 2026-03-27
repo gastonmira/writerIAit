@@ -17,9 +17,12 @@
 
 ## Product Depth
 
+- **Check modes** — let the user choose the type of check before triggering the shortcut (or via a quick picker in the overlay):
+  - ✏️ **Correct** *(default, Grammarly-style)* — fix grammar and spelling, keep the original meaning intact
+  - ✨ **Improve** — keep the meaning but make it more natural, better phrasing, improved fluency
+  - 🎯 **Rewrite with intent** — transform tone on demand: "more professional", "more friendly", "more concise". Each intent maps to a different system prompt instruction.
 - **Error highlighting** — underline errors directly in the text field while the overlay is open, so the user sees exactly where they are
 - **Learning patterns** — the stats panel already tracks corrections; surface insights like "you often miss apostrophes in contractions" in the popup
-- **Custom tone override** — let the user manually set tone per-session instead of relying on hostname detection
 
 ## Reliability / Polish
 
