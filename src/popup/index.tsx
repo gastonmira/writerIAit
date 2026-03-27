@@ -760,7 +760,7 @@ export default function Popup() {
             borderRadius: 8,
             padding: "10px 12px"
           }}>
-            <div style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)" }}>
+            <div style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
               {stats.count}
             </div>
             <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>
