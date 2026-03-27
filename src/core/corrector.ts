@@ -1,7 +1,7 @@
 // corrector.ts — pure correction logic
 // NO chrome.* imports — this module must stay portable (v3 native app)
 
-import type { Correction } from "../types"
+import type { CheckMode, Correction, RewriteIntent } from "../types"
 
 // ─── Tone Detection ────────────────────────────────────────────────────────
 
@@ -32,13 +32,24 @@ const LANGUAGE_PHRASES: Record<string, string> = {
     "Chinese-to-English transfer errors (e.g., aspect markers, measure words, article usage)"
 }
 
-export function buildSystemPrompt(nativeLanguage: string, tone: string): string {
+export function buildSystemPrompt(
+  nativeLanguage: string,
+  tone: string,
+  mode: CheckMode = "correct",
+  rewriteIntent: RewriteIntent = "professional"
+): string {
   const languagePhrase = LANGUAGE_PHRASES[nativeLanguage]
 
   const languageInstruction = languagePhrase
     ? `The writer is a native ${nativeLanguage} speaker. Pay special attention to ${languagePhrase}.`
     : "Pay attention to common grammar and phrasing errors."
 
+  if (mode === "correct") return buildCorrectPrompt(languageInstruction, tone)
+  if (mode === "improve") return buildImprovePrompt(languageInstruction, tone)
+  return buildRewritePrompt(languageInstruction, tone, rewriteIntent)
+}
+
+function buildCorrectPrompt(languageInstruction: string, tone: string): string {
   return `You are a strict English grammar checker helping non-native speakers write correctly.
 
 ${languageInstruction}
@@ -59,6 +70,56 @@ Return ONLY a JSON array:
 [{"original": "phrase from text", "replacement": "corrected phrase", "reason": "explanation"}]
 
 If truly no corrections are needed, return: []
+
+Do not add markdown, code fences, or any text outside the JSON array.`
+}
+
+function buildImprovePrompt(languageInstruction: string, tone: string): string {
+  return `You are a fluency editor helping non-native speakers sound more natural in English.
+
+${languageInstruction}
+
+The text should read as ${tone}.
+
+Do NOT fix grammar errors that don't exist. Identify phrases that are grammatically correct but sound unnatural, overly literal, or awkward to a native speaker — and suggest more fluent, idiomatic alternatives. Preserve the original meaning exactly.
+
+Rules for your JSON output:
+- "original" should be 2–5 words of surrounding context (so it can be uniquely found in the text)
+- "replacement" is the improved version of that exact phrase, keeping meaning intact
+- "reason" briefly explains why the original sounds unnatural and why the replacement is more idiomatic
+
+Return ONLY a JSON array:
+[{"original": "phrase from text", "replacement": "improved phrase", "reason": "explanation"}]
+
+If the text already reads naturally, return: []
+
+Do not add markdown, code fences, or any text outside the JSON array.`
+}
+
+const REWRITE_INTENT_INSTRUCTIONS: Record<RewriteIntent, string> = {
+  professional: "Transform the text to sound confident, formal, and polished — suitable for a work email or business report.",
+  friendly: "Transform the text to sound warm, approachable, and conversational — suitable for a Slack message or informal colleague note.",
+  concise: "Transform the text to be as concise as possible — cut every word that does not add meaning. Keep all key information.",
+}
+
+function buildRewritePrompt(languageInstruction: string, tone: string, rewriteIntent: RewriteIntent): string {
+  const intentInstruction = REWRITE_INTENT_INSTRUCTIONS[rewriteIntent]
+  return `You are a writing assistant that rewrites English text to match a specific tone.
+
+${languageInstruction}
+
+${intentInstruction}
+
+Important constraints:
+- Preserve the original meaning. Do not add new information or omit key facts.
+- "original" must be a verbatim substring of the input (minimum 4 words) so it can be located by exact string match.
+- "replacement" is the rewritten version of that exact segment.
+- "reason" explains the specific change in tone or phrasing.
+
+Return ONLY a JSON array:
+[{"original": "verbatim substring", "replacement": "rewritten version", "reason": "explanation"}]
+
+If no change is needed to achieve the target tone, return: []
 
 Do not add markdown, code fences, or any text outside the JSON array.`
 }

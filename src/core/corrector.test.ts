@@ -32,7 +32,7 @@ describe("detectTone", () => {
 
 // ─── buildSystemPrompt ─────────────────────────────────────────────────────
 
-describe("buildSystemPrompt", () => {
+describe("buildSystemPrompt — correct mode (default)", () => {
   it("includes Spanish transfer error phrasing for Spanish", () => {
     const prompt = buildSystemPrompt("Spanish", "professional email")
     expect(prompt).toContain("Spanish-to-English transfer errors")
@@ -61,6 +61,92 @@ describe("buildSystemPrompt", () => {
   it("always returns JSON-only instruction", () => {
     const prompt = buildSystemPrompt("Spanish", "technical English")
     expect(prompt).toContain("ONLY a JSON array")
+  })
+
+  it("backward compat: no mode arg produces same output as explicit correct mode", () => {
+    expect(buildSystemPrompt("Spanish", "professional email"))
+      .toBe(buildSystemPrompt("Spanish", "professional email", "correct"))
+  })
+})
+
+describe("buildSystemPrompt — improve mode", () => {
+  it("mentions fluency / natural phrasing", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "improve")
+    expect(prompt).toMatch(/fluency|natural/i)
+  })
+
+  it("mentions idiomatic", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "improve")
+    expect(prompt).toContain("idiomatic")
+  })
+
+  it("includes tone", () => {
+    const prompt = buildSystemPrompt("Spanish", "casual business", "improve")
+    expect(prompt).toContain("casual business")
+  })
+
+  it("includes Spanish language phrase", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "improve")
+    expect(prompt).toContain("Spanish-to-English transfer errors")
+  })
+
+  it("does NOT contain grammar-errors phrasing", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "improve")
+    expect(prompt).not.toContain("Find ALL grammar errors")
+  })
+
+  it("requires JSON-only output", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "improve")
+    expect(prompt).toContain("ONLY a JSON array")
+  })
+
+  it("includes 2–5 word original context rule", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "improve")
+    expect(prompt).toContain("2–5 words")
+  })
+})
+
+describe("buildSystemPrompt — rewrite mode", () => {
+  it("professional intent: mentions formal or polished", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "rewrite", "professional")
+    expect(prompt).toMatch(/formal|polished/i)
+  })
+
+  it("friendly intent: mentions warm or approachable or conversational", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "rewrite", "friendly")
+    expect(prompt).toMatch(/warm|approachable|conversational/i)
+  })
+
+  it("concise intent: mentions concise and cut", () => {
+    const prompt = buildSystemPrompt("Spanish", "professional email", "rewrite", "concise")
+    expect(prompt).toContain("concise")
+    expect(prompt).toContain("cut")
+  })
+
+  it("all intents: contains verbatim substring constraint", () => {
+    for (const intent of ["professional", "friendly", "concise"] as const) {
+      const prompt = buildSystemPrompt("Spanish", "professional email", "rewrite", intent)
+      expect(prompt).toContain("verbatim")
+    }
+  })
+
+  it("all intents: includes Spanish language phrase", () => {
+    for (const intent of ["professional", "friendly", "concise"] as const) {
+      const prompt = buildSystemPrompt("Spanish", "professional email", "rewrite", intent)
+      expect(prompt).toContain("Spanish-to-English transfer errors")
+    }
+  })
+
+  it("all intents: requires JSON-only output", () => {
+    for (const intent of ["professional", "friendly", "concise"] as const) {
+      const prompt = buildSystemPrompt("Spanish", "professional email", "rewrite", intent)
+      expect(prompt).toContain("ONLY a JSON array")
+    }
+  })
+
+  it("defaults to professional when no rewriteIntent arg", () => {
+    expect(buildSystemPrompt("Spanish", "professional email", "rewrite"))
+      .toBe(buildSystemPrompt("Spanish", "professional email", "rewrite", "professional"))
   })
 })
 

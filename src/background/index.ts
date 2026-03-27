@@ -53,13 +53,13 @@ async function handleCheckText(
   msg: CheckTextMessage,
   tabId: number
 ): Promise<CheckTextResponse> {
-  const { text, nativeLanguage, tone, apiKey, provider } = msg
+  const { text, nativeLanguage, tone, apiKey, provider, mode = "correct", rewriteIntent = "professional" } = msg
 
   const controller = new AbortController()
   abortControllers.set(tabId, controller)
 
   try {
-    const systemPrompt = buildSystemPrompt(nativeLanguage, tone)
+    const systemPrompt = buildSystemPrompt(nativeLanguage, tone, mode, rewriteIntent)
     const raw = await fetchLLM(provider, apiKey, systemPrompt, text, controller.signal)
     console.log("[WriteAI] text sent:", text)
     console.log("[WriteAI] raw response:", raw)

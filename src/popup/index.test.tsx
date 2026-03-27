@@ -158,6 +158,19 @@ describe("onboarding wizard", () => {
     expect(dots).toHaveLength(3)
     dots.forEach(dot => expect(dot).toHaveClass("active"))
   })
+
+  it("finish writes checkMode and rewriteIntent defaults to sync storage", async () => {
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByText(/choose your ai provider/i))
+    await user.click(screen.getByText("Groq"))
+    await user.type(screen.getByLabelText(/api key/i), "gsk_testkey")
+    await user.click(screen.getByText(/save & continue/i))
+    await user.click(screen.getByText(/start writing/i))
+    const sync = await chrome.storage.sync.get(["checkMode", "rewriteIntent"])
+    expect(sync.checkMode).toBe("correct")
+    expect(sync.rewriteIntent).toBe("professional")
+  })
 })
 
 // ─── Returning user: normal view shown ─────────────────────────────────────
@@ -201,5 +214,92 @@ describe("normal settings view", () => {
     await user.type(screen.getByLabelText(/api key/i), "sk-test123")
     await user.click(screen.getByText("Save"))
     expect(await screen.findByText("Saved!")).toBeInTheDocument()
+  })
+
+  it("renders 3 mode buttons", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    render(<Popup />)
+    await waitFor(() => screen.getByText(/native language/i))
+    expect(screen.getByText("✏️ Correct")).toBeInTheDocument()
+    expect(screen.getByText("✨ Improve")).toBeInTheDocument()
+    expect(screen.getByText("✍️ Rewrite")).toBeInTheDocument()
+  })
+
+  it("Correct mode button is selected by default", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    render(<Popup />)
+    await waitFor(() => screen.getByText("✏️ Correct"))
+    expect(screen.getByText("✏️ Correct").closest("button")).toHaveClass("selected")
+    expect(screen.getByText("✨ Improve").closest("button")).not.toHaveClass("selected")
+  })
+
+  it("clicking Improve selects it and saves to sync storage", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByText("✨ Improve"))
+    await user.click(screen.getByText("✨ Improve"))
+    expect(screen.getByText("✨ Improve").closest("button")).toHaveClass("selected")
+    const sync = await chrome.storage.sync.get(["checkMode"])
+    expect(sync.checkMode).toBe("improve")
+  })
+
+  it("clicking Rewrite reveals sub-intent select", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByText("✍️ Rewrite"))
+    expect(screen.queryByRole("combobox", { name: /rewrite-intent/i })).toBeNull()
+    await user.click(screen.getByText("✍️ Rewrite"))
+    expect(screen.getByRole("combobox", { name: /rewrite-intent/i })).toBeInTheDocument()
+  })
+
+  it("clicking Correct hides the sub-intent select", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    await chrome.storage.sync.set({ checkMode: "rewrite" })
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByText("✏️ Correct"))
+    await user.click(screen.getByText("✏️ Correct"))
+    expect(screen.queryByDisplayValue(/professional/i)).toBeNull()
+  })
+
+  it("sub-intent select has Professional/Friendly/Concise options", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByText("✍️ Rewrite"))
+    await user.click(screen.getByText("✍️ Rewrite"))
+    const select = screen.getByRole("combobox", { name: /rewrite-intent/i })
+    expect(select).toContainHTML("Professional")
+    expect(select).toContainHTML("Friendly")
+    expect(select).toContainHTML("Concise")
+  })
+
+  it("changing sub-intent saves rewriteIntent to sync storage", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByText("✍️ Rewrite"))
+    await user.click(screen.getByText("✍️ Rewrite"))
+    await user.selectOptions(screen.getByRole("combobox", { name: /rewrite-intent/i }), "concise")
+    const sync = await chrome.storage.sync.get(["rewriteIntent"])
+    expect(sync.rewriteIntent).toBe("concise")
+  })
+
+  it("loads checkMode from sync storage on mount", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    await chrome.storage.sync.set({ checkMode: "improve" })
+    render(<Popup />)
+    await waitFor(() => screen.getByText("✨ Improve"))
+    expect(screen.getByText("✨ Improve").closest("button")).toHaveClass("selected")
+  })
+
+  it("loads rewriteIntent from sync storage and shows sub-intent select", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    await chrome.storage.sync.set({ checkMode: "rewrite", rewriteIntent: "friendly" })
+    render(<Popup />)
+    await waitFor(() => screen.getByDisplayValue("Friendly"))
+    expect(screen.getByDisplayValue("Friendly")).toBeInTheDocument()
   })
 })

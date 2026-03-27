@@ -2,7 +2,7 @@
 // React component, CSS custom properties for all design tokens
 
 import { useEffect, useState } from "react"
-import type { LLMProvider } from "../types"
+import type { CheckMode, LLMProvider, RewriteIntent } from "../types"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 
@@ -50,7 +50,22 @@ const ROOT_STYLE = `
     }
   }
 
-  body { width: 360px; background: var(--bg); }
+  body {
+    width: 360px;
+    background: var(--bg);
+  }
+
+  #popup-root {
+    display: flex;
+    flex-direction: column;
+    height: 580px;
+    overflow: hidden;
+  }
+
+  #popup-scroll {
+    overflow-y: auto;
+    flex: 1;
+  }
 
   label {
     display: block;
@@ -62,7 +77,7 @@ const ROOT_STYLE = `
     letter-spacing: 0.04em;
   }
 
-  select, input {
+  input {
     width: 100%;
     padding: 8px 10px;
     border: 1px solid var(--border);
@@ -74,6 +89,17 @@ const ROOT_STYLE = `
     appearance: none;
   }
 
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 14px;
+  }
+
   select:focus, input:focus {
     outline: 2px solid var(--accent);
     outline-offset: 1px;
@@ -83,6 +109,28 @@ const ROOT_STYLE = `
     height: 1px;
     background: var(--border);
     margin: 0;
+  }
+
+  .mode-strip {
+    display: flex;
+    gap: 4px;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 12px;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+  .mode-btn.selected {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
   }
 
   /* ─── Onboarding ──────────────────────────────────────────────────────── */
@@ -335,6 +383,8 @@ export default function Popup() {
   const [nativeLanguage, setNativeLanguage] = useState("Spanish")
   const [apiKey, setApiKey] = useState("")
   const [provider, setProvider] = useState<LLMProvider>("gemini")
+  const [checkMode, setCheckMode] = useState<CheckMode>("correct")
+  const [rewriteIntent, setRewriteIntent] = useState<RewriteIntent>("professional")
   const [stats, setStats] = useState<WeekStats>({ count: 0, topFix: null })
   const [saved, setSaved] = useState(false)
 
@@ -345,9 +395,11 @@ export default function Popup() {
 
   // Load saved settings + check onboarding flag
   useEffect(() => {
-    chrome.storage.sync.get(["nativeLanguage", "provider"]).then(res => {
+    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent"]).then(res => {
       if (res.nativeLanguage) setNativeLanguage(res.nativeLanguage)
       if (res.provider) setProvider(res.provider as LLMProvider)
+      if (res.checkMode) setCheckMode(res.checkMode as CheckMode)
+      if (res.rewriteIntent) setRewriteIntent(res.rewriteIntent as RewriteIntent)
     })
     chrome.storage.local.get(["apiKey", "correctionsThisWeek", "weekStart", "reasons", "hasOnboarded"]).then(res => {
       if (res.apiKey) setApiKey(res.apiKey)
@@ -361,6 +413,15 @@ export default function Popup() {
   }, [])
 
   // ── Settings handlers ──────────────────────────────────────────────────
+
+  function handleModeChange(val: CheckMode) {
+    setCheckMode(val)
+    chrome.storage.sync.set({ checkMode: val })
+  }
+  function handleRewriteIntentChange(val: RewriteIntent) {
+    setRewriteIntent(val)
+    chrome.storage.sync.set({ rewriteIntent: val })
+  }
 
   function handleLanguageChange(val: string) {
     setNativeLanguage(val)
@@ -398,6 +459,7 @@ export default function Popup() {
 
   function handleFinish() {
     chrome.storage.local.set({ hasOnboarded: true })
+    chrome.storage.sync.set({ checkMode: "correct", rewriteIntent: "professional" })
     setHasOnboarded(true)
   }
 
@@ -444,12 +506,12 @@ export default function Popup() {
 
   if (!hasOnboarded) {
     return (
-      <>
+      <div id="popup-root">
         <style dangerouslySetInnerHTML={{ __html: ROOT_STYLE }} />
         {Header}
         <div className="divider" />
 
-        <div className="onboarding-wrap">
+        <div className="onboarding-wrap" style={{ overflowY: "auto", flex: 1 }}>
           {/* Progress dots */}
           <div className="onboarding-progress">
             {[1, 2, 3].map(n => (
@@ -567,17 +629,19 @@ export default function Popup() {
             </>
           )}
         </div>
-      </>
+      </div>
     )
   }
 
   // ── Normal settings view ───────────────────────────────────────────────
 
   return (
-    <>
+    <div id="popup-root">
       <style dangerouslySetInnerHTML={{ __html: ROOT_STYLE }} />
 
       {Header}
+
+      <div id="popup-scroll">
 
       <div className="divider" />
 
@@ -598,6 +662,34 @@ export default function Popup() {
             <option value="Chinese">Chinese</option>
             <option value="Other">Other</option>
           </select>
+        </div>
+
+        <div>
+          <label>Check Mode</label>
+          <div className="mode-strip">
+            {([ ["correct", "✏️ Correct"], ["improve", "✨ Improve"], ["rewrite", "✍️ Rewrite"] ] as const).map(([m, label]) => (
+              <button
+                key={m}
+                className={`mode-btn${checkMode === m ? " selected" : ""}`}
+                onClick={() => handleModeChange(m)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {checkMode === "rewrite" && (
+            <select
+              id="rewrite-intent"
+              aria-label="rewrite-intent"
+              value={rewriteIntent}
+              onChange={e => handleRewriteIntentChange(e.target.value as RewriteIntent)}
+              style={{ marginTop: 6 }}
+            >
+              <option value="professional">Professional</option>
+              <option value="friendly">Friendly</option>
+              <option value="concise">Concise</option>
+            </select>
+          )}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -732,7 +824,9 @@ export default function Popup() {
           </div>
         </div>
       </div>
-    </>
+
+      </div>{/* end #popup-scroll */}
+    </div>
   )
 }
 
