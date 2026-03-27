@@ -13,7 +13,30 @@
 
 ## High Impact / Quick Wins
 
-- **E2E tests for onboarding** — Playwright spec that loads the extension, clears `hasOnboarded` from storage, walks through all 3 wizard steps, verifies the normal view renders after completion, and checks the skip path. Add to `e2e/onboarding.spec.ts`.
+- **E2E test coverage** — expand Playwright suite to cover all untested flows. Existing: 7 correction-flow tests. Missing:
+
+  **`e2e/onboarding.spec.ts`**
+  - First run: wizard opens on Step 1 (no `hasOnboarded` in storage)
+  - Pick provider → Step 2 shows correct key link
+  - Empty key → validation error, no advance
+  - Complete wizard → normal settings view renders
+  - Skip → normal settings view immediately
+  - Reopen popup after finish → normal view (wizard never shown again)
+
+  **`e2e/correction-flow.spec.ts`** (additions to existing file)
+  - Keyboard nav: `←`/`→` cycles through carousel corrections
+  - `Enter` accepts current correction, advances or closes
+  - `A` accepts all corrections at once
+  - `Esc` dismisses overlay without changes
+  - Undo toast appears after Accept All, clicking it restores original text
+  - Works on `<input type="text">` (not just textarea)
+  - Works on `contenteditable` div
+
+  **`e2e/popup.spec.ts`**
+  - Changing native language saves to sync storage
+  - Changing provider saves to sync storage
+  - Saving API key shows "Saved!" confirmation
+  - Stats panel shows correct correction count after a correction is made
 
 ## Product Depth
 
