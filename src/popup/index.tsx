@@ -342,7 +342,7 @@ const ROOT_STYLE = `
     padding: 4px 10px;
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
@@ -803,7 +803,7 @@ export default function Popup() {
             padding: "4px 10px",
             background: "var(--surface)",
             border: "1px solid var(--border)",
-            borderRadius: 6,
+            borderRadius: "var(--radius-sm)",
             fontSize: 13,
             fontWeight: 500,
             color: "var(--text-primary)",
