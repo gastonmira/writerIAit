@@ -74,7 +74,9 @@ async function handleCheckText(
       // fetch() network failure
       return { error: "No internet connection." }
     }
-    return { error: "API request failed." }
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error("[WriteAI] API error:", msg)
+    return { error: `API request failed: ${msg}` }
   } finally {
     abortControllers.delete(tabId)
   }
@@ -110,7 +112,7 @@ async function fetchOpenAI(
       "Authorization": `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: "gpt-5-mini",
+      model: "gpt-4o-mini",
       temperature: 0,
       max_tokens: 1024,
       messages: [
