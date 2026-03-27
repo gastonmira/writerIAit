@@ -135,9 +135,8 @@ const SHADOW_CSS = `
     color: var(--text-secondary);
     font-family: inherit;
     font-size: 14px;
-    min-height: unset;
-    width: 24px;
-    height: 24px;
+    min-height: 44px;
+    min-width: 44px;
     padding: 0;
     display: flex;
     align-items: center;
@@ -245,9 +244,8 @@ const SHADOW_CSS = `
     color: var(--muted);
     border: none;
     padding: 0;
-    min-height: unset;
-    width: 24px;
-    height: 24px;
+    min-height: 44px;
+    min-width: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
