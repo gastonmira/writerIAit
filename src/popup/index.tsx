@@ -279,7 +279,7 @@ const ROOT_STYLE = `
 
   .btn-primary {
     padding: 0 14px;
-    min-height: 38px;
+    min-height: 36px;
     background: var(--accent);
     color: #fff;
     border: none;
@@ -757,7 +757,7 @@ export default function Popup() {
           <div style={{
             background: "var(--surface)",
             border: "1px solid var(--border)",
-            borderRadius: 8,
+            borderRadius: "var(--radius-md)",
             padding: "10px 12px"
           }}>
             <div style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
@@ -771,7 +771,7 @@ export default function Popup() {
           <div style={{
             background: "var(--surface)",
             border: "1px solid var(--border)",
-            borderRadius: 8,
+            borderRadius: "var(--radius-md)",
             padding: "10px 12px"
           }}>
             {stats.topFix ? (
