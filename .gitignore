@@ -6,3 +6,12 @@ build/
 *.pem
 .env
 .env.local
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Test artifacts
+test-results/
+
+# gstack
+.gstack/
