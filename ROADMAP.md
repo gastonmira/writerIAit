@@ -49,6 +49,7 @@
 
 ## Reliability / Polish
 
+- **Handle "Extension context invalidated" crash** — after the extension is reloaded/updated, the content script loses its runtime connection and throws `Uncaught Error: Extension context invalidated` when `chrome.runtime.connect()` is called in the overlay. Fix: catch the error in `overlay.ts`, tear down the content script gracefully, and show a "please reload the page" nudge instead of crashing. Repro: load the extension, trigger an overlay, reload the extension in `chrome://extensions`, then trigger again.
 - **More apps** — Notion, Linear, Twitter/X (contenteditable already works, but tone detection doesn't know about them)
 
 ## Bigger Swings
