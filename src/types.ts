@@ -1,4 +1,6 @@
 export type LLMProvider = "openai" | "anthropic" | "gemini" | "groq"
+export type CheckMode = "correct" | "improve" | "rewrite"
+export type RewriteIntent = "professional" | "friendly" | "concise"
 
 export interface Correction {
   original: string
@@ -13,6 +15,8 @@ export interface CheckTextMessage {
   tone: string
   apiKey: string
   provider: LLMProvider
+  mode?: CheckMode
+  rewriteIntent?: RewriteIntent
 }
 
 export type CheckTextResponse =
