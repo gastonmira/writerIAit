@@ -3,7 +3,7 @@
 
 import type { PlasmoCSConfig } from "plasmo"
 import { applyCorrections } from "../core/corrector"
-import type { CheckTextMessage, CheckTextResponse, Correction } from "../types"
+import type { CheckTextMessage, CheckTextResponse, Correction, CheckMode, RewriteIntent } from "../types"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -301,6 +301,17 @@ const SHADOW_CSS = `
   }
 
   .toast-label { flex: 1; }
+
+  .mode-badge {
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 `
 
 // ─── Element lock ──────────────────────────────────────────────────────────
@@ -353,6 +364,13 @@ function getTextContent(el: HTMLElement): string {
     return el.value
   }
   return el.innerText
+}
+
+function modeBadgeLabel(mode: CheckMode, rewriteIntent: RewriteIntent): string {
+  if (mode === "correct") return "✏️ Correct"
+  if (mode === "improve") return "✨ Improve"
+  const intentLabel = { professional: "Professional", friendly: "Friendly", concise: "Concise" }[rewriteIntent]
+  return `🎯 ${intentLabel}`
 }
 
 function setTextContent(el: HTMLElement, correctedText: string): void {
@@ -521,7 +539,7 @@ function showUndoToast(
 
 // ─── Render functions ──────────────────────────────────────────────────────
 
-function renderLoading(root: ShadowRoot, onCancel: () => void): void {
+function renderLoading(root: ShadowRoot, onCancel: () => void, mode: CheckMode, rewriteIntent: RewriteIntent): void {
   const overlay = document.createElement("div")
   overlay.className = "overlay"
 
@@ -532,6 +550,12 @@ function renderLoading(root: ShadowRoot, onCancel: () => void): void {
     <span class="title">Checking your English…</span>
     <div class="spinner"></div>
   `
+
+  const badge = document.createElement("span")
+  badge.className = "mode-badge"
+  badge.textContent = modeBadgeLabel(mode, rewriteIntent)
+  header.appendChild(badge)
+
   const closeBtn = document.createElement("button")
   closeBtn.className = "btn-close"
   closeBtn.title = "Cancel"
@@ -587,7 +611,9 @@ function renderCorrections(
   corrections: Correction[],
   onAcceptOne: (c: Correction) => void,
   onAcceptAll: () => void,
-  onDismiss: () => void
+  onDismiss: () => void,
+  mode: CheckMode,
+  rewriteIntent: RewriteIntent
 ): void {
   const pending = [...corrections]
   let idx = 0
@@ -604,6 +630,11 @@ function renderCorrections(
   titleEl.className = "title"
   titleEl.textContent = "Correction"
   header.appendChild(titleEl)
+
+  const badge = document.createElement("span")
+  badge.className = "mode-badge"
+  badge.textContent = modeBadgeLabel(mode, rewriteIntent)
+  header.appendChild(badge)
 
   const prevBtn = document.createElement("button")
   prevBtn.className = "nav-btn"
@@ -878,20 +909,24 @@ async function handleTrigger(): Promise<void> {
   lockElement(el)
   const root = getOrCreateHost(el, iframeRect)
 
+  try {
+    const [syncSettings, localSettings] = await Promise.all([
+      chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent"]),
+      chrome.storage.local.get(["apiKey"])
+    ])
+    const settings = { ...syncSettings, ...localSettings }
+    const apiKey: string = settings.apiKey ?? ""
+
+    const checkMode = (syncSettings.checkMode ?? "correct") as CheckMode
+    const rewriteIntent = (syncSettings.rewriteIntent ?? "professional") as RewriteIntent
+
   // Show loading — cancel sends CANCEL_CHECK to background
   renderLoading(root, () => {
     unlockElement()
     removeOverlay()
     chrome.runtime.sendMessage({ type: "CANCEL_CHECK" }).catch(() => {})
-  })
+  }, checkMode, rewriteIntent)
 
-  try {
-    const [syncSettings, localSettings] = await Promise.all([
-      chrome.storage.sync.get(["nativeLanguage", "provider"]),
-      chrome.storage.local.get(["apiKey"])
-    ])
-    const settings = { ...syncSettings, ...localSettings }
-    const apiKey: string = settings.apiKey ?? ""
     if (!apiKey) {
       unlockElement()
       removeOverlay()
@@ -913,7 +948,9 @@ async function handleTrigger(): Promise<void> {
       nativeLanguage,
       tone,
       apiKey,
-      provider
+      provider,
+      mode: checkMode,
+      rewriteIntent: rewriteIntent,
     }
 
     const response = await chrome.runtime.sendMessage(msg) as CheckTextResponse
@@ -973,7 +1010,9 @@ async function handleTrigger(): Promise<void> {
         recordStats(corrections)
         showUndoToast(el, text, el, iframeRect)
       },
-      onDismissWithToast
+      onDismissWithToast,
+      checkMode,
+      rewriteIntent
     )
   } catch {
     unlockElement()
