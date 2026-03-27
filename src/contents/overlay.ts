@@ -66,6 +66,13 @@ const SHADOW_CSS = `
     to { transform: rotate(360deg); }
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   .overlay {
     background: var(--bg);
     border: 1px solid var(--border);
