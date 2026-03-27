@@ -317,7 +317,7 @@ const PROVIDER_META: Array<{
 }> = [
   { id: "gemini",    name: "Google Gemini", model: "gemini-2.0-flash-lite", free: true,  keyUrl: "https://aistudio.google.com/apikey" },
   { id: "groq",      name: "Groq",          model: "llama-3.1-8b-instant",  free: true,  keyUrl: "https://console.groq.com/keys" },
-  { id: "openai",    name: "OpenAI",        model: "gpt-4o-mini",           free: false, keyUrl: "https://platform.openai.com/api-keys" },
+  { id: "openai",    name: "OpenAI",        model: "gpt-5-mini",            free: false, keyUrl: "https://platform.openai.com/api-keys" },
   { id: "anthropic", name: "Anthropic",     model: "claude-haiku",          free: false, keyUrl: "https://console.anthropic.com/settings/keys" },
 ]
 
@@ -692,7 +692,7 @@ export default function Popup() {
             value={provider}
             onChange={e => handleProviderChange(e.target.value as LLMProvider)}
           >
-            <option value="openai">OpenAI (gpt-4o-mini) — paid</option>
+            <option value="openai">OpenAI (gpt-5-mini) — paid</option>
             <option value="anthropic">Anthropic (claude-haiku) — paid</option>
             <option value="gemini">Google Gemini (flash-lite) — free</option>
             <option value="groq">Groq (llama-3.1-8b) — free</option>

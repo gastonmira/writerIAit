@@ -11,7 +11,7 @@ Chrome extension (Plasmo + TypeScript + React) for grammar correction for non-na
 
 ## LLM Providers
 Supported: `"openai"` | `"anthropic"` | `"gemini"` | `"groq"`
-- OpenAI: gpt-4o-mini (paid)
+- OpenAI: gpt-5-mini (paid)
 - Anthropic: claude-haiku-4-5-20251001 (paid)
 - Gemini: gemini-2.0-flash-lite (free — aistudio.google.com)
 - Groq: llama-3.1-8b-instant (free — console.groq.com)
