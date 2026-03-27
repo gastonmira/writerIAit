@@ -370,7 +370,7 @@ function modeBadgeLabel(mode: CheckMode, rewriteIntent: RewriteIntent): string {
   if (mode === "correct") return "✏️ Correct"
   if (mode === "improve") return "✨ Improve"
   const intentLabel = { professional: "Professional", friendly: "Friendly", concise: "Concise" }[rewriteIntent]
-  return `🎯 ${intentLabel}`
+  return `✍️ ${intentLabel}`
 }
 
 function setTextContent(el: HTMLElement, correctedText: string): void {

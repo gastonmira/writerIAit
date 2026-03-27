@@ -62,7 +62,7 @@ const ROOT_STYLE = `
     letter-spacing: 0.04em;
   }
 
-  select, input {
+  input {
     width: 100%;
     padding: 8px 10px;
     border: 1px solid var(--border);
@@ -72,6 +72,17 @@ const ROOT_STYLE = `
     font-family: inherit;
     font-size: 14px;
     appearance: none;
+  }
+
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 14px;
   }
 
   select:focus, input:focus {
@@ -639,7 +650,7 @@ export default function Popup() {
         <div>
           <label>Check Mode</label>
           <div className="mode-strip">
-            {([ ["correct", "✏️ Correct"], ["improve", "✨ Improve"], ["rewrite", "🎯 Rewrite"] ] as const).map(([m, label]) => (
+            {([ ["correct", "✏️ Correct"], ["improve", "✨ Improve"], ["rewrite", "✍️ Rewrite"] ] as const).map(([m, label]) => (
               <button
                 key={m}
                 className={`mode-btn${checkMode === m ? " selected" : ""}`}
