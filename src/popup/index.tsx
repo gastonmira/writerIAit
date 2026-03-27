@@ -556,7 +556,7 @@ export default function Popup() {
                       <div className="provider-model">{p.model}</div>
                     </div>
                     {p.free
-                      ? <span className="badge-free">Free ↗</span>
+                      ? <span className="badge-free">Free</span>
                       : <span className="badge-paid">Paid</span>
                     }
                   </button>
@@ -673,7 +673,7 @@ export default function Popup() {
         <div>
           <label>Check Mode</label>
           <div className="mode-strip">
-            {([ ["correct", "✏️ Correct"], ["improve", "✨ Improve"], ["rewrite", "✍️ Rewrite"] ] as const).map(([m, label]) => (
+            {([ ["correct", "Correct"], ["improve", "Improve"], ["rewrite", "Rewrite"] ] as const).map(([m, label]) => (
               <button
                 key={m}
                 className={`mode-btn${checkMode === m ? " selected" : ""}`}
@@ -702,8 +702,8 @@ export default function Popup() {
           <label>Correction View</label>
           <div className="mode-strip">
             {([
-              ["inline",    "⬛ Inline"],
-              ["explained", "💬 Explained"],
+              ["inline",    "Inline"],
+              ["explained", "Explained"],
             ] as const).map(([v, label]) => (
               <button
                 key={v}
