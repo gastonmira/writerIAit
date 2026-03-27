@@ -1,4 +1,4 @@
-# WriteAI — Roadmap
+# WriteIAit — Roadmap
 
 ## Shipped
 
@@ -9,11 +9,11 @@
 - ✅ **Carousel UI** — corrections shown one at a time (`‹ N of M ›`) instead of a scrollable list
 - ✅ **Bottom-right positioning** — overlay anchors to the bottom-right of the textarea instead of covering the text
 - ✅ **Version in popup** — `v0.1.0` shown next to Active status in the popup header
+- ✅ **Onboarding wizard** — 3-step first-run flow (choose provider → API key → done), guides users to free providers first
 
 ## High Impact / Quick Wins
 
-- **Auto-detect active element** — trigger on `Cmd+Shift+K` even when focus is slightly off (e.g. user clicked away)
-- **Onboarding** — first-run popup that walks through API key setup instead of showing an error overlay cold
+- **E2E tests for onboarding** — Playwright spec that loads the extension, clears `hasOnboarded` from storage, walks through all 3 wizard steps, verifies the normal view renders after completion, and checks the skip path. Add to `e2e/onboarding.spec.ts`.
 
 ## Product Depth
 
