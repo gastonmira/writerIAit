@@ -2,8 +2,8 @@
 // All styles via <style> tag — NO inline style="" (Gmail CSP blocks them)
 
 import type { PlasmoCSConfig } from "plasmo"
-import { applyCorrections } from "../core/corrector"
-import type { CheckTextMessage, CheckTextResponse, Correction, CheckMode, RewriteIntent } from "../types"
+import { applyCorrections, buildDiffHtml } from "../core/corrector"
+import type { CheckTextMessage, CheckTextResponse, Correction, CheckMode, CorrectionView, RewriteIntent } from "../types"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -312,6 +312,24 @@ const SHADOW_CSS = `
     white-space: nowrap;
     flex-shrink: 0;
   }
+
+  .action-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    padding: 8px 12px;
+    animation: fadeIn 150ms ease-out;
+  }
+
+  .action-bar-label {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
 `
 
 // ─── Element lock ──────────────────────────────────────────────────────────
@@ -391,6 +409,144 @@ function setTextContent(el: HTMLElement, correctedText: string): void {
   }
 }
 
+// ─── Inline diff helpers ───────────────────────────────────────────────────
+// buildDiffHtml is imported from core/corrector (pure, testable)
+
+function injectDiffStyles(): void {
+  if (document.getElementById("writeai-diff-styles")) return
+  const styleEl = document.createElement("style")
+  styleEl.id = "writeai-diff-styles"
+  styleEl.textContent = `
+    .writeai-del, .writeai-ins {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: inherit;
+      border-radius: 4px;
+      padding: 1px 3px;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: opacity 120ms ease;
+    }
+    .writeai-del {
+      background: #fee2e2;
+      color: #991b1b;
+      text-decoration: line-through;
+    }
+    .writeai-ins {
+      background: #dcfce7;
+      color: #166534;
+      text-decoration: underline;
+    }
+    .writeai-del:hover { opacity: 0.7; }
+    .writeai-ins:hover { opacity: 0.75; filter: brightness(0.92); }
+    @media (prefers-color-scheme: dark) {
+      .writeai-del { background: #450a0a; color: #fca5a5; }
+      .writeai-ins { background: #052e16; color: #86efac; }
+    }
+  `
+  document.head.appendChild(styleEl)
+}
+
+function removeDiffStyles(): void {
+  document.getElementById("writeai-diff-styles")?.remove()
+}
+
+function createTextareaMirror(
+  el: HTMLTextAreaElement | HTMLInputElement,
+  corrections: Correction[]
+): void {
+  const rect = el.getBoundingClientRect()
+  const cs = window.getComputedStyle(el)
+
+  // Inject positioning via <style> tag — no inline style="" (Gmail CSP)
+  const mirrorStyle = document.createElement("style")
+  mirrorStyle.id = "writeai-mirror-style"
+  mirrorStyle.textContent = `
+    #writeai-mirror-el {
+      position: fixed !important;
+      top: ${rect.top}px !important;
+      left: ${rect.left}px !important;
+      width: ${rect.width}px !important;
+      height: ${rect.height}px !important;
+      pointer-events: none !important;
+      overflow: hidden !important;
+      z-index: 2147483646 !important;
+      box-sizing: ${cs.boxSizing} !important;
+      white-space: pre-wrap !important;
+      word-break: ${cs.wordBreak} !important;
+      overflow-wrap: ${cs.overflowWrap} !important;
+      background: transparent !important;
+      font-family: ${cs.fontFamily} !important;
+      font-size: ${cs.fontSize} !important;
+      line-height: ${cs.lineHeight} !important;
+      padding-top: ${cs.paddingTop} !important;
+      padding-right: ${cs.paddingRight} !important;
+      padding-bottom: ${cs.paddingBottom} !important;
+      padding-left: ${cs.paddingLeft} !important;
+      border-top-width: ${cs.borderTopWidth} !important;
+      border-right-width: ${cs.borderRightWidth} !important;
+      border-bottom-width: ${cs.borderBottomWidth} !important;
+      border-left-width: ${cs.borderLeftWidth} !important;
+      border-style: solid !important;
+      border-color: transparent !important;
+      letter-spacing: ${cs.letterSpacing} !important;
+      word-spacing: ${cs.wordSpacing} !important;
+    }
+  `
+  document.head.appendChild(mirrorStyle)
+
+  injectDiffStyles()
+
+  const div = document.createElement("div")
+  div.id = "writeai-mirror-el"
+  div.setAttribute("aria-hidden", "true")
+  div.innerHTML = buildDiffHtml(el.value, corrections)
+  document.body.appendChild(div)
+  mirrorEl = div
+
+  // Hide textarea text — element is locked, user cannot type during diff display
+  // Modifying el.style directly (existing page element) is not blocked by CSP
+  savedElColor = el.style.color
+  savedElCaretColor = el.style.caretColor
+  el.style.color = "transparent"
+  el.style.caretColor = "transparent"
+}
+
+function injectContentEditableDiff(el: HTMLElement, corrections: Correction[]): void {
+  contentEditableSnapshot = el.innerHTML
+  injectDiffStyles()
+  el.innerHTML = buildDiffHtml(el.innerText, corrections)
+}
+
+function removeInlineDiff(el: HTMLElement): void {
+  if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) {
+    if (inlineDiffClickHandler) {
+      mirrorEl?.removeEventListener("click", inlineDiffClickHandler)
+    }
+    mirrorEl?.remove()
+    mirrorEl = null
+    document.getElementById("writeai-mirror-style")?.remove()
+    el.style.color = savedElColor ?? ""
+    el.style.caretColor = savedElCaretColor ?? ""
+    savedElColor = null
+    savedElCaretColor = null
+  } else {
+    if (inlineDiffClickHandler) {
+      el.removeEventListener("click", inlineDiffClickHandler)
+    }
+    if (contentEditableSnapshot !== null) {
+      el.innerHTML = contentEditableSnapshot
+      contentEditableSnapshot = null
+    }
+  }
+  inlineDiffClickHandler = null
+  removeDiffStyles()
+  if (resizeHandler) {
+    window.removeEventListener("resize", resizeHandler)
+    resizeHandler = null
+  }
+  inlineDiffEl = null
+}
+
 // ─── Overlay host ──────────────────────────────────────────────────────────
 
 let overlayHost: HTMLElement | null = null
@@ -398,6 +554,15 @@ let keyboardHandler: ((e: KeyboardEvent) => void) | null = null
 let toastHost: HTMLElement | null = null
 let toastTimer: ReturnType<typeof setTimeout> | null = null
 let lastFocusedEl: HTMLElement | null = null
+
+// ─── Inline diff state ─────────────────────────────────────────────────────
+let mirrorEl: HTMLElement | null = null
+let contentEditableSnapshot: string | null = null
+let resizeHandler: (() => void) | null = null
+let savedElColor: string | null = null
+let savedElCaretColor: string | null = null
+let inlineDiffEl: HTMLElement | null = null
+let inlineDiffClickHandler: ((e: Event) => void) | null = null
 
 function getOrCreateHost(anchorEl: HTMLElement, iframeRect: DOMRect | null = null): ShadowRoot {
   removeOverlay()
@@ -824,6 +989,146 @@ function renderError(root: ShadowRoot, message: string, onDismiss: () => void): 
   root.appendChild(overlay)
 }
 
+// ─── Inline diff rendering ─────────────────────────────────────────────────
+
+function renderInlineActionBar(
+  el: HTMLElement,
+  nCorrections: number,
+  iframeRect: DOMRect | null,
+  onAcceptAll: () => void,
+  onDismiss: () => void
+): HTMLElement {
+  const root = getOrCreateHost(el, iframeRect)
+
+  const bar = document.createElement("div")
+  bar.className = "action-bar"
+
+  const logo = document.createElement("div")
+  logo.className = "logo"
+  logo.innerHTML = `<span class="logo-letter">W</span>`
+
+  const label = document.createElement("span")
+  label.className = "action-bar-label"
+  label.textContent = `${nCorrections} correction${nCorrections === 1 ? "" : "s"} found`
+
+  const dismissBtn = document.createElement("button")
+  dismissBtn.className = "btn-ghost"
+  dismissBtn.textContent = "Dismiss"
+  dismissBtn.addEventListener("click", onDismiss)
+
+  const acceptAllBtn = document.createElement("button")
+  acceptAllBtn.className = "btn-primary"
+  acceptAllBtn.textContent = "Accept All"
+  acceptAllBtn.addEventListener("click", onAcceptAll)
+
+  bar.appendChild(logo)
+  bar.appendChild(label)
+  bar.appendChild(dismissBtn)
+  bar.appendChild(acceptAllBtn)
+  root.appendChild(bar)
+
+  // Keyboard shortcuts: Enter/A = accept all, Esc = dismiss
+  attachKeyboardShortcuts(() => {}, () => {}, onAcceptAll, onAcceptAll, onDismiss)
+  acceptAllBtn.focus()
+
+  // Return label element so caller can update the count dynamically
+  return label
+}
+
+function renderInlineDiff(
+  el: HTMLElement,
+  allCorrections: Correction[],
+  baseText: string,
+  iframeRect: DOMRect | null,
+  onFinalAccept: (finalText: string) => void,
+  onDismiss: () => void
+): void {
+  // Re-lock element for the duration of diff display
+  // (it was unlocked after the LLM call returned)
+  lockElement(el)
+  inlineDiffEl = el
+
+  // ── Internal state ─────────────────────────────────────────────────────────
+  const remaining = [...allCorrections]
+  const accepted: Correction[] = []
+  let labelEl: HTMLElement | null = null
+
+  function getCurrentText(): string {
+    return accepted.length > 0 ? applyCorrections(baseText, accepted) : baseText
+  }
+
+  function updateLabel() {
+    if (!labelEl) return
+    const n = remaining.length
+    labelEl.textContent = n === 0
+      ? "All corrections applied!"
+      : `${n} correction${n === 1 ? "" : "s"} remaining`
+  }
+
+  function rebuildDisplay() {
+    const currentText = getCurrentText()
+    if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) {
+      if (mirrorEl) mirrorEl.innerHTML = buildDiffHtml(currentText, remaining)
+    } else {
+      // Rebuild contenteditable inline spans
+      el.innerHTML = buildDiffHtml(currentText, remaining)
+    }
+    updateLabel()
+  }
+
+  // ── Click handler for individual corrections ────────────────────────────────
+  // Click <ins> → accept; click <del> → reject/skip
+  inlineDiffClickHandler = (e: Event) => {
+    const target = e.target as HTMLElement
+    const idxStr = (target as HTMLElement).dataset?.idx
+    if (idxStr === undefined) return
+    const idx = parseInt(idxStr)
+    const correction = remaining[idx]
+    if (!correction) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (target.classList.contains("writeai-ins")) {
+      accepted.push(correction)
+      remaining.splice(idx, 1)
+    } else if (target.classList.contains("writeai-del")) {
+      remaining.splice(idx, 1)
+    } else {
+      return
+    }
+
+    rebuildDisplay()
+
+    if (remaining.length === 0) {
+      // All resolved — brief pause so user sees the final state, then finish
+      setTimeout(() => onFinalAccept(getCurrentText()), 400)
+    }
+  }
+
+  // ── Mount diff display ──────────────────────────────────────────────────────
+  if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) {
+    createTextareaMirror(el, remaining)
+    mirrorEl?.addEventListener("click", inlineDiffClickHandler)
+  } else {
+    injectContentEditableDiff(el, remaining)
+    el.addEventListener("click", inlineDiffClickHandler)
+  }
+
+  // getOrCreateHost (inside renderInlineActionBar) calls removeOverlay(),
+  // which removes the loading/checking overlay — this is intentional
+  labelEl = renderInlineActionBar(
+    el,
+    remaining.length,
+    iframeRect,
+    () => onFinalAccept(applyCorrections(baseText, [...accepted, ...remaining])),
+    onDismiss
+  )
+
+  resizeHandler = () => onDismiss()
+  window.addEventListener("resize", resizeHandler, { passive: true })
+}
+
 // ─── Correction stats ──────────────────────────────────────────────────────
 
 async function recordStats(corrections: Correction[]): Promise<void> {
@@ -911,7 +1216,7 @@ async function handleTrigger(): Promise<void> {
 
   try {
     const [syncSettings, localSettings] = await Promise.all([
-      chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent"]),
+      chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent", "correctionView"]),
       chrome.storage.local.get(["apiKey"])
     ])
     const settings = { ...syncSettings, ...localSettings }
@@ -919,6 +1224,7 @@ async function handleTrigger(): Promise<void> {
 
     const checkMode = (syncSettings.checkMode ?? "correct") as CheckMode
     const rewriteIntent = (syncSettings.rewriteIntent ?? "professional") as RewriteIntent
+    const correctionView = (syncSettings.correctionView ?? "inline") as CorrectionView
 
   // Show loading — cancel sends CANCEL_CHECK to background
   renderLoading(root, () => {
@@ -978,44 +1284,65 @@ async function handleTrigger(): Promise<void> {
       return
     }
 
-    const root2 = getOrCreateHost(el, iframeRect)
-    let undoSnapshot: string | null = null
+    if (correctionView === "inline") {
+      renderInlineDiff(
+        el,
+        corrections,
+        text,
+        iframeRect,
+        (finalText) => {
+          unlockElement()
+          if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
+          removeOverlay()
+          setTextContent(el, finalText)
+          recordStats(corrections)
+          showUndoToast(el, text, el, iframeRect)
+        },
+        () => {
+          unlockElement()
+          if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
+          removeOverlay()
+        }
+      )
+    } else {
+      // "explained" — original carousel with per-correction reasons
+      const root2 = getOrCreateHost(el, iframeRect)
+      let undoSnapshot: string | null = null
 
-    const onDismissWithToast = () => {
-      removeOverlay()
-      if (undoSnapshot !== null) {
-        const snap = undoSnapshot
-        undoSnapshot = null
-        // defer so removeOverlay finishes before toast is injected
-        setTimeout(() => showUndoToast(el, snap, el, iframeRect), 0)
-      }
-    }
-
-    renderCorrections(
-      root2,
-      corrections,
-      (c) => {
-        // Accept one — capture snapshot before applying so sequential accepts are each undoable
-        undoSnapshot = getTextContent(el)
-        const correctedText = applyCorrections(undoSnapshot, [c])
-        setTextContent(el, correctedText)
-        recordStats([c])
-      },
-      () => {
-        // Accept All — use original text as the undo snapshot
-        undoSnapshot = null  // prevent onDismissWithToast from double-triggering
+      const onDismissWithToast = () => {
         removeOverlay()
-        const correctedText = applyCorrections(text, corrections)
-        setTextContent(el, correctedText)
-        recordStats(corrections)
-        showUndoToast(el, text, el, iframeRect)
-      },
-      onDismissWithToast,
-      checkMode,
-      rewriteIntent
-    )
+        if (undoSnapshot !== null) {
+          const snap = undoSnapshot
+          undoSnapshot = null
+          setTimeout(() => showUndoToast(el, snap, el, iframeRect), 0)
+        }
+      }
+
+      renderCorrections(
+        root2,
+        corrections,
+        (c) => {
+          undoSnapshot = getTextContent(el)
+          const correctedText = applyCorrections(undoSnapshot, [c])
+          setTextContent(el, correctedText)
+          recordStats([c])
+        },
+        () => {
+          undoSnapshot = null
+          removeOverlay()
+          const correctedText = applyCorrections(text, corrections)
+          setTextContent(el, correctedText)
+          recordStats(corrections)
+          showUndoToast(el, text, el, iframeRect)
+        },
+        onDismissWithToast,
+        checkMode,
+        rewriteIntent
+      )
+    }
   } catch {
     unlockElement()
+    if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
     removeOverlay()
     const root2 = getOrCreateHost(el, iframeRect)
     renderError(root2, "Something went wrong. Please try again.", () => {
@@ -1050,6 +1377,7 @@ chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "TRIGGER_FIX") {
     handleTrigger().catch(err => {
       unlockElement()
+      if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
       removeOverlay()
       console.error("[WriteAI] handleTrigger error:", err)
     })
@@ -1060,6 +1388,7 @@ chrome.runtime.onMessage.addListener((message) => {
 
 window.addEventListener("beforeunload", () => {
   unlockElement()
+  if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
   removeOverlay()
   removeToast()
 })

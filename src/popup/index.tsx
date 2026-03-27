@@ -2,7 +2,7 @@
 // React component, CSS custom properties for all design tokens
 
 import { useEffect, useState } from "react"
-import type { CheckMode, LLMProvider, RewriteIntent } from "../types"
+import type { CheckMode, CorrectionView, LLMProvider, RewriteIntent } from "../types"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 
@@ -385,6 +385,7 @@ export default function Popup() {
   const [provider, setProvider] = useState<LLMProvider>("gemini")
   const [checkMode, setCheckMode] = useState<CheckMode>("correct")
   const [rewriteIntent, setRewriteIntent] = useState<RewriteIntent>("professional")
+  const [correctionView, setCorrectionView] = useState<CorrectionView>("inline")
   const [stats, setStats] = useState<WeekStats>({ count: 0, topFix: null })
   const [saved, setSaved] = useState(false)
 
@@ -395,11 +396,12 @@ export default function Popup() {
 
   // Load saved settings + check onboarding flag
   useEffect(() => {
-    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent"]).then(res => {
+    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent", "correctionView"]).then(res => {
       if (res.nativeLanguage) setNativeLanguage(res.nativeLanguage)
       if (res.provider) setProvider(res.provider as LLMProvider)
       if (res.checkMode) setCheckMode(res.checkMode as CheckMode)
       if (res.rewriteIntent) setRewriteIntent(res.rewriteIntent as RewriteIntent)
+      if (res.correctionView) setCorrectionView(res.correctionView as CorrectionView)
     })
     chrome.storage.local.get(["apiKey", "correctionsThisWeek", "weekStart", "reasons", "hasOnboarded"]).then(res => {
       if (res.apiKey) setApiKey(res.apiKey)
@@ -417,6 +419,10 @@ export default function Popup() {
   function handleModeChange(val: CheckMode) {
     setCheckMode(val)
     chrome.storage.sync.set({ checkMode: val })
+  }
+  function handleCorrectionViewChange(val: CorrectionView) {
+    setCorrectionView(val)
+    chrome.storage.sync.set({ correctionView: val })
   }
   function handleRewriteIntentChange(val: RewriteIntent) {
     setRewriteIntent(val)
@@ -690,6 +696,29 @@ export default function Popup() {
               <option value="concise">Concise</option>
             </select>
           )}
+        </div>
+
+        <div>
+          <label>Correction View</label>
+          <div className="mode-strip">
+            {([
+              ["inline",    "⬛ Inline"],
+              ["explained", "💬 Explained"],
+            ] as const).map(([v, label]) => (
+              <button
+                key={v}
+                className={`mode-btn${correctionView === v ? " selected" : ""}`}
+                onClick={() => handleCorrectionViewChange(v)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 5 }}>
+            {correctionView === "inline"
+              ? "Diffs shown directly in the text field. Click to accept or skip each one."
+              : "One correction at a time with explanation. Navigate with arrow keys."}
+          </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

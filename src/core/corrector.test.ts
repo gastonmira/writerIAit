@@ -3,7 +3,8 @@ import {
   detectTone,
   buildSystemPrompt,
   parseLLMResponse,
-  applyCorrections
+  applyCorrections,
+  buildDiffHtml
 } from "./corrector"
 
 // ─── detectTone ────────────────────────────────────────────────────────────
@@ -282,5 +283,102 @@ describe("applyCorrections", () => {
     const result = applyCorrections(text, corrections)
     // First occurrence (pos 0) replaced, second (pos 28) untouched
     expect(result.startsWith("a cat sat")).toBe(true)
+  })
+})
+
+// ─── buildDiffHtml ─────────────────────────────────────────────────────────
+
+describe("buildDiffHtml", () => {
+  it("wraps a single correction in del/ins spans", () => {
+    const text = "I is happy today."
+    const corrections = [{ original: "I is", replacement: "I am", reason: "r" }]
+    const html = buildDiffHtml(text, corrections)
+    expect(html).toBe(
+      '<del class="writeai-del" data-idx="0">I is</del><ins class="writeai-ins" data-idx="0">I am</ins> happy today.'
+    )
+  })
+
+  it("wraps two non-overlapping corrections", () => {
+    const text = "I is happy since 3 years."
+    const corrections = [
+      { original: "I is", replacement: "I am", reason: "r1" },
+      { original: "since 3 years", replacement: "for 3 years", reason: "r2" }
+    ]
+    const html = buildDiffHtml(text, corrections)
+    expect(html).toContain('<del class="writeai-del" data-idx="0">I is</del>')
+    expect(html).toContain('<ins class="writeai-ins" data-idx="0">I am</ins>')
+    expect(html).toContain('<del class="writeai-del" data-idx="1">since 3 years</del>')
+    expect(html).toContain('<ins class="writeai-ins" data-idx="1">for 3 years</ins>')
+    // Unchanged segments preserved
+    expect(html).toContain(" happy ")
+  })
+
+  it("returns plain HTML-escaped text when no corrections match", () => {
+    const text = "Hello world."
+    const html = buildDiffHtml(text, [
+      { original: "not found", replacement: "x", reason: "r" }
+    ])
+    expect(html).toBe("Hello world.")
+  })
+
+  it("returns empty string for empty text", () => {
+    expect(buildDiffHtml("", [])).toBe("")
+  })
+
+  it("HTML-escapes special characters in unchanged text", () => {
+    const text = "Use <strong> tags & quotes\"."
+    const html = buildDiffHtml(text, [])
+    expect(html).toBe("Use &lt;strong&gt; tags &amp; quotes&quot;.")
+    expect(html).not.toContain("<strong>")
+  })
+
+  it("HTML-escapes special characters inside del/ins spans", () => {
+    const text = "a <b> c"
+    const corrections = [{ original: "<b>", replacement: "&bold;", reason: "r" }]
+    const html = buildDiffHtml(text, corrections)
+    expect(html).toContain("&lt;b&gt;")   // original escaped in del span
+    expect(html).toContain("&amp;bold;")  // replacement escaped in ins span
+    expect(html).not.toContain("<b>")
+  })
+
+  it("keeps leftmost correction when two corrections overlap", () => {
+    // "have presented the" starts at 3, "presented the numbers" starts at 8
+    const text = "we have presented the numbers"
+    const corrections = [
+      { original: "have presented the", replacement: "presented the", reason: "r1" },
+      { original: "presented the numbers", replacement: "presented these numbers", reason: "r2" }
+    ]
+    const html = buildDiffHtml(text, corrections)
+    // Only the leftmost (have presented the) should appear
+    expect(html).toContain("have presented the")
+    // The rightmost should be silently dropped — "presented these numbers" should NOT be in an ins span
+    expect(html).not.toContain("presented these numbers")
+  })
+
+  it("handles correction at the start of text", () => {
+    const text = "since 3 years I work here."
+    const corrections = [{ original: "since 3 years", replacement: "for 3 years", reason: "r" }]
+    const html = buildDiffHtml(text, corrections)
+    expect(html.startsWith('<del class="writeai-del" data-idx="0">since 3 years</del>')).toBe(true)
+  })
+
+  it("handles correction at the end of text", () => {
+    const text = "I work here since 3 years"
+    const corrections = [{ original: "since 3 years", replacement: "for 3 years", reason: "r" }]
+    const html = buildDiffHtml(text, corrections)
+    expect(html.endsWith('<ins class="writeai-ins" data-idx="0">for 3 years</ins>')).toBe(true)
+  })
+
+  it("handles empty corrections array — returns escaped text", () => {
+    const text = "This is fine."
+    expect(buildDiffHtml(text, [])).toBe("This is fine.")
+  })
+
+  it("skips correction whose original is not found in text", () => {
+    const text = "Hello world."
+    const corrections = [
+      { original: "goodbye", replacement: "farewell", reason: "r" }
+    ]
+    expect(buildDiffHtml(text, corrections)).toBe("Hello world.")
   })
 })

@@ -54,5 +54,5 @@
 
 ## Bigger Swings
 
-- **Inline diff mode** — instead of a floating overlay, show red/green diffs inline in the text field itself
+- ✅ **Inline diff mode** — red/green diffs shown directly in the text field; click individual spans to accept/skip; toggle between Inline and Explained (carousel) in popup settings
 - **On-device model** — use WebLLM or a local Ollama instance so text never leaves the machine

@@ -1,6 +1,7 @@
 export type LLMProvider = "openai" | "anthropic" | "gemini" | "groq"
 export type CheckMode = "correct" | "improve" | "rewrite"
 export type RewriteIntent = "professional" | "friendly" | "concise"
+export type CorrectionView = "inline" | "explained"
 
 export interface Correction {
   original: string
