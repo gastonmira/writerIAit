@@ -1,6 +1,6 @@
 {
   "ext_name": {
-    "message": "WriteAI",
+    "message": "WriteIAit",
     "description": "Extension name"
   },
   "ext_description": {
@@ -62,5 +62,61 @@
   "top_fix": {
     "message": "Top fix",
     "description": "Most common correction category in popup"
+  },
+  "onboarding_choose_provider": {
+    "message": "Choose your AI provider",
+    "description": "Step 1 headline in onboarding wizard"
+  },
+  "onboarding_provider_sub": {
+    "message": "Gemini and Groq are free — no credit card needed.",
+    "description": "Step 1 subtitle"
+  },
+  "onboarding_language_optional": {
+    "message": "Your native language (optional)",
+    "description": "Language selector label in Step 1"
+  },
+  "onboarding_skip": {
+    "message": "Already set up? Skip →",
+    "description": "Skip link on Step 1"
+  },
+  "onboarding_add_key": {
+    "message": "Add your API key",
+    "description": "Step 2 headline"
+  },
+  "onboarding_key_sub": {
+    "message": "Keys are stored locally and never leave your device.",
+    "description": "Step 2 subtitle"
+  },
+  "onboarding_key_empty": {
+    "message": "Please paste your API key before continuing.",
+    "description": "Inline validation error on Step 2"
+  },
+  "onboarding_save_continue": {
+    "message": "Save & Continue →",
+    "description": "Step 2 primary button"
+  },
+  "onboarding_back": {
+    "message": "← Back",
+    "description": "Back navigation link in wizard"
+  },
+  "onboarding_done_headline": {
+    "message": "You're all set.",
+    "description": "Step 3 headline"
+  },
+  "onboarding_done_sub": {
+    "message": "WriteIAit is active on all pages.",
+    "description": "Step 3 subtitle"
+  },
+  "onboarding_shortcut_helper": {
+    "message": "Focus any text field and press this shortcut to check your English.",
+    "description": "Step 3 shortcut helper text"
+  },
+  "onboarding_teaching_note": {
+    "message": "Teaching Mode is always on — every correction includes an explanation of why.",
+    "description": "Teaching Mode note in Step 3"
+  },
+  "onboarding_start_writing": {
+    "message": "Start Writing →",
+    "description": "Step 3 primary button"
   }
 }

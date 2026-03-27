@@ -21,6 +21,9 @@ const ROOT_STYLE = `
     --accent: #2563eb;
     --accent-hover: #1d4ed8;
     --success: #16a34a;
+    --error: #dc2626;
+    --ins-bg: #dcfce7;
+    --ins-text: #166534;
     --radius-sm: 4px;
     --radius-md: 8px;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -41,10 +44,13 @@ const ROOT_STYLE = `
       --accent: #3b82f6;
       --accent-hover: #60a5fa;
       --success: #4ade80;
+      --error: #f87171;
+      --ins-bg: #052e16;
+      --ins-text: #86efac;
     }
   }
 
-  body { width: 360px; min-height: 400px; background: var(--bg); }
+  body { width: 360px; background: var(--bg); }
 
   label {
     display: block;
@@ -78,7 +84,242 @@ const ROOT_STYLE = `
     background: var(--border);
     margin: 0;
   }
+
+  /* ─── Onboarding ──────────────────────────────────────────────────────── */
+
+  .onboarding-wrap {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .onboarding-progress {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .progress-dot.active {
+    background: var(--accent);
+  }
+
+  .onboarding-headline {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .onboarding-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: -8px;
+  }
+
+  .provider-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+
+  .provider-card:hover {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  .provider-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .provider-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .provider-model {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+
+  .badge-free {
+    padding: 2px 6px;
+    background: var(--ins-bg);
+    color: var(--ins-text);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .badge-paid {
+    padding: 2px 6px;
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .skip-link {
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: right;
+    align-self: flex-end;
+    font-family: inherit;
+  }
+
+  .skip-link:hover { color: var(--text-secondary); }
+
+  .provider-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .key-link {
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    margin-top: -8px;
+  }
+
+  .key-link:hover { text-decoration: underline; }
+
+  .key-error {
+    font-size: 12px;
+    color: var(--error);
+    margin-top: 4px;
+  }
+
+  .btn-primary {
+    padding: 0 14px;
+    min-height: 38px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 150ms ease;
+    width: 100%;
+  }
+
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .back-link {
+    font-size: 12px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+  }
+
+  .back-link:hover { color: var(--text-secondary); }
+
+  .done-check {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--ins-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--ins-text);
+  }
+
+  .shortcut-callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .shortcut-callout-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .shortcut-badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+  }
+
+  .shortcut-callout-helper {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .teaching-note {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--muted);
+  }
 `
+
+// ─── Provider metadata ──────────────────────────────────────────────────────
+
+const PROVIDER_META: Array<{
+  id: LLMProvider
+  name: string
+  model: string
+  free: boolean
+  keyUrl: string
+}> = [
+  { id: "gemini",    name: "Google Gemini", model: "gemini-2.0-flash-lite", free: true,  keyUrl: "https://aistudio.google.com/apikey" },
+  { id: "groq",      name: "Groq",          model: "llama-3.1-8b-instant",  free: true,  keyUrl: "https://console.groq.com/keys" },
+  { id: "openai",    name: "OpenAI",        model: "gpt-4o-mini",           free: false, keyUrl: "https://platform.openai.com/api-keys" },
+  { id: "anthropic", name: "Anthropic",     model: "claude-haiku",          free: false, keyUrl: "https://console.anthropic.com/settings/keys" },
+]
 
 // ─── Keyboard shortcut detection ───────────────────────────────────────────
 
@@ -93,26 +334,34 @@ type WeekStats = { count: number; topFix: string | null }
 export default function Popup() {
   const [nativeLanguage, setNativeLanguage] = useState("Spanish")
   const [apiKey, setApiKey] = useState("")
-  const [provider, setProvider] = useState<LLMProvider>("openai")
+  const [provider, setProvider] = useState<LLMProvider>("gemini")
   const [stats, setStats] = useState<WeekStats>({ count: 0, topFix: null })
   const [saved, setSaved] = useState(false)
 
-  // Load saved settings
+  // Onboarding state
+  const [hasOnboarded, setHasOnboarded] = useState<boolean | null>(null)
+  const [onboardingStep, setOnboardingStep] = useState<1 | 2 | 3>(1)
+  const [keyError, setKeyError] = useState("")
+
+  // Load saved settings + check onboarding flag
   useEffect(() => {
     chrome.storage.sync.get(["nativeLanguage", "provider"]).then(res => {
       if (res.nativeLanguage) setNativeLanguage(res.nativeLanguage)
       if (res.provider) setProvider(res.provider as LLMProvider)
     })
-    chrome.storage.local.get(["apiKey", "correctionsThisWeek", "weekStart", "reasons"]).then(res => {
+    chrome.storage.local.get(["apiKey", "correctionsThisWeek", "weekStart", "reasons", "hasOnboarded"]).then(res => {
       if (res.apiKey) setApiKey(res.apiKey)
       const count = res.correctionsThisWeek ?? 0
       const reasons: string[] = res.reasons ?? []
       const topFix = getTopFix(reasons)
       setStats({ count, topFix })
+      setHasOnboarded(!!res.hasOnboarded)
+      if (!res.hasOnboarded) setOnboardingStep(1)
     })
   }, [])
 
-  // Save language + provider to sync storage
+  // ── Settings handlers ──────────────────────────────────────────────────
+
   function handleLanguageChange(val: string) {
     setNativeLanguage(val)
     chrome.storage.sync.set({ nativeLanguage: val })
@@ -123,7 +372,6 @@ export default function Popup() {
     chrome.storage.sync.set({ provider: val })
   }
 
-  // Save API key to local storage (not sync — don't sync keys across devices)
   function handleApiKeySave() {
     chrome.storage.local.set({ apiKey }).then(() => {
       setSaved(true)
@@ -131,30 +379,205 @@ export default function Popup() {
     })
   }
 
+  // ── Onboarding handlers ────────────────────────────────────────────────
+
+  function handleProviderSelect(p: LLMProvider) {
+    handleProviderChange(p)
+    setOnboardingStep(2)
+  }
+
+  function handleApiKeyNext() {
+    if (!apiKey.trim()) {
+      setKeyError("Please paste your API key before continuing.")
+      return
+    }
+    setKeyError("")
+    chrome.storage.local.set({ apiKey })
+    setOnboardingStep(3)
+  }
+
+  function handleFinish() {
+    chrome.storage.local.set({ hasOnboarded: true })
+    setHasOnboarded(true)
+  }
+
+  function handleSkip() {
+    chrome.storage.local.set({ hasOnboarded: true })
+    setHasOnboarded(true)
+  }
+
   const shortcut = getShortcutLabel()
+  const providerMeta = PROVIDER_META.find(p => p.id === provider) ?? PROVIDER_META[0]
 
-  return (
-    <>
-      <style dangerouslySetInnerHTML={{ __html: ROOT_STYLE }} />
+  // ── Render ─────────────────────────────────────────────────────────────
 
-      {/* Header */}
-      <div style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{
-          width: 28, height: 28,
-          background: "var(--accent)",
-          borderRadius: 6,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0
-        }}>
-          <span style={{ color: "#fff", fontSize: 14, fontWeight: 600, lineHeight: 1 }}>W</span>
-        </div>
-        <span style={{ fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>WriteAI</span>
+  // While loading — avoid flash
+  if (hasOnboarded === null) {
+    return <style dangerouslySetInnerHTML={{ __html: ROOT_STYLE }} />
+  }
+
+  // ── Shared header ──────────────────────────────────────────────────────
+
+  const Header = (
+    <div style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{
+        width: 28, height: 28,
+        background: "var(--accent)",
+        borderRadius: 6,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0
+      }}>
+        <span style={{ color: "#fff", fontSize: 14, fontWeight: 600, lineHeight: 1 }}>W</span>
+      </div>
+      <span style={{ fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>WriteIAit</span>
+      {hasOnboarded && (
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5 }}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--success)" }} />
           <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>Active</span>
           <span style={{ fontSize: 11, color: "var(--muted)" }}>v{chrome.runtime.getManifest().version}</span>
         </div>
-      </div>
+      )}
+    </div>
+  )
+
+  // ── Onboarding wizard ──────────────────────────────────────────────────
+
+  if (!hasOnboarded) {
+    return (
+      <>
+        <style dangerouslySetInnerHTML={{ __html: ROOT_STYLE }} />
+        {Header}
+        <div className="divider" />
+
+        <div className="onboarding-wrap">
+          {/* Progress dots */}
+          <div className="onboarding-progress">
+            {[1, 2, 3].map(n => (
+              <div key={n} className={`progress-dot${onboardingStep >= n ? " active" : ""}`} />
+            ))}
+          </div>
+
+          {/* Step 1 — Choose provider */}
+          {onboardingStep === 1 && (
+            <>
+              <div className="onboarding-headline">Choose your AI provider</div>
+              <div className="onboarding-sub">Gemini and Groq are free — no credit card needed.</div>
+
+              <div>
+                <label htmlFor="native-language-ob">Your native language (optional)</label>
+                <select
+                  id="native-language-ob"
+                  value={nativeLanguage}
+                  onChange={e => handleLanguageChange(e.target.value)}
+                >
+                  <option value="Spanish">Spanish</option>
+                  <option value="Portuguese">Portuguese</option>
+                  <option value="French">French</option>
+                  <option value="German">German</option>
+                  <option value="Arabic">Arabic</option>
+                  <option value="Chinese">Chinese</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {PROVIDER_META.map(p => (
+                  <button key={p.id} className="provider-card" onClick={() => handleProviderSelect(p.id)}>
+                    <div>
+                      <div className="provider-name">{p.name}</div>
+                      <div className="provider-model">{p.model}</div>
+                    </div>
+                    {p.free
+                      ? <span className="badge-free">Free ↗</span>
+                      : <span className="badge-paid">Paid</span>
+                    }
+                  </button>
+                ))}
+              </div>
+
+              <button className="skip-link" onClick={handleSkip}>
+                Already set up? Skip →
+              </button>
+            </>
+          )}
+
+          {/* Step 2 — Add API key */}
+          {onboardingStep === 2 && (
+            <>
+              <div className="onboarding-headline">Add your API key</div>
+              <div className="onboarding-sub">Keys are stored locally and never leave your device.</div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span className="provider-chip">{providerMeta.name}</span>
+                <a
+                  className="key-link"
+                  href={providerMeta.keyUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Get your {providerMeta.name} key →
+                </a>
+              </div>
+
+              <div>
+                <label htmlFor="api-key-ob">API key</label>
+                <input
+                  id="api-key-ob"
+                  type="password"
+                  placeholder={getApiKeyPlaceholder(provider)}
+                  value={apiKey}
+                  onChange={e => { setApiKey(e.target.value); setKeyError("") }}
+                  onKeyDown={e => { if (e.key === "Enter") handleApiKeyNext() }}
+                  autoFocus
+                />
+                {keyError && <div className="key-error">{keyError}</div>}
+              </div>
+
+              <button className="btn-primary" onClick={handleApiKeyNext}>
+                Save &amp; Continue →
+              </button>
+              <button className="back-link" onClick={() => setOnboardingStep(1)}>
+                ← Back
+              </button>
+            </>
+          )}
+
+          {/* Step 3 — Done */}
+          {onboardingStep === 3 && (
+            <>
+              <div className="done-check">✓</div>
+              <div className="onboarding-headline">You're all set.</div>
+              <div className="onboarding-sub">WriteIAit is active on all pages.</div>
+
+              <div className="shortcut-callout">
+                <div className="shortcut-callout-label">Keyboard shortcut</div>
+                <span className="shortcut-badge">{shortcut}</span>
+                <div className="shortcut-callout-helper">
+                  Focus any text field and press this shortcut to check your English.
+                </div>
+              </div>
+
+              <div className="teaching-note">
+                Teaching Mode is always on — every correction includes an explanation of why.
+              </div>
+
+              <button className="btn-primary" onClick={handleFinish}>
+                Start Writing →
+              </button>
+            </>
+          )}
+        </div>
+      </>
+    )
+  }
+
+  // ── Normal settings view ───────────────────────────────────────────────
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: ROOT_STYLE }} />
+
+      {Header}
 
       <div className="divider" />
 
@@ -313,7 +736,7 @@ export default function Popup() {
   )
 }
 
-// ─── Top fix calculation ───────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────
 
 function getApiKeyPlaceholder(provider: LLMProvider): string {
   if (provider === "openai") return "sk-…"
@@ -324,7 +747,6 @@ function getApiKeyPlaceholder(provider: LLMProvider): string {
 
 function getTopFix(reasons: string[]): string | null {
   if (!reasons.length) return null
-  // Extract first 3 words from each reason as a category key
   const counts = new Map<string, number>()
   for (const r of reasons) {
     const key = r.split(/\s+/).slice(0, 3).join(" ")
