@@ -497,7 +497,7 @@ export default function Popup() {
       }}>
         <span style={{ color: "#fff", fontSize: 14, fontWeight: 600, lineHeight: 1 }}>W</span>
       </div>
-      <span style={{ fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>WriteIAit</span>
+      <span style={{ fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>WriteAI</span>
       {hasOnboarded && (
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5 }}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--success)" }} />
@@ -615,7 +615,7 @@ export default function Popup() {
             <>
               <div className="done-check">✓</div>
               <div className="onboarding-headline">You're all set.</div>
-              <div className="onboarding-sub">WriteIAit is active on all pages.</div>
+              <div className="onboarding-sub">WriteAI is active on all pages.</div>
 
               <div className="shortcut-callout">
                 <div className="shortcut-callout-label">Keyboard shortcut</div>
