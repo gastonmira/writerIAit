@@ -1,0 +1,66 @@
+{
+  "ext_name": {
+    "message": "WriteAI",
+    "description": "Extension name"
+  },
+  "ext_description": {
+    "message": "Grammar correction for non-native English speakers",
+    "description": "Extension description"
+  },
+  "checking_english": {
+    "message": "Checking your English…",
+    "description": "Loading state in overlay"
+  },
+  "looks_good": {
+    "message": "Looks good!",
+    "description": "No corrections needed"
+  },
+  "no_corrections_needed": {
+    "message": "No corrections needed.",
+    "description": "Subtitle when text is already correct"
+  },
+  "accept_all": {
+    "message": "Accept All",
+    "description": "Button to apply all corrections"
+  },
+  "dismiss": {
+    "message": "Dismiss",
+    "description": "Button to close overlay without changes"
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Button to cancel in-progress check"
+  },
+  "no_text_found": {
+    "message": "No text found in this field.",
+    "description": "Error when text field is empty"
+  },
+  "no_internet": {
+    "message": "No internet connection.",
+    "description": "Error when offline"
+  },
+  "set_api_key": {
+    "message": "Set your API key in the extension popup.",
+    "description": "Error when API key is missing"
+  },
+  "native_language": {
+    "message": "Native language",
+    "description": "Label for language selector in popup"
+  },
+  "shortcut": {
+    "message": "Shortcut",
+    "description": "Label for keyboard shortcut in popup"
+  },
+  "api_key": {
+    "message": "API key",
+    "description": "Label for API key input in popup"
+  },
+  "corrections_this_week": {
+    "message": "Corrections this week",
+    "description": "Stat label in popup"
+  },
+  "top_fix": {
+    "message": "Top fix",
+    "description": "Most common correction category in popup"
+  }
+}

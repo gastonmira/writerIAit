@@ -1,0 +1,66 @@
+{
+  "ext_name": {
+    "message": "WriteAI",
+    "description": "Extension name"
+  },
+  "ext_description": {
+    "message": "Correção gramatical para falantes não nativos de inglês",
+    "description": "Extension description"
+  },
+  "checking_english": {
+    "message": "Verificando seu inglês…",
+    "description": "Loading state in overlay"
+  },
+  "looks_good": {
+    "message": "Está ótimo!",
+    "description": "No corrections needed"
+  },
+  "no_corrections_needed": {
+    "message": "Nenhuma correção necessária.",
+    "description": "Subtitle when text is already correct"
+  },
+  "accept_all": {
+    "message": "Aceitar tudo",
+    "description": "Button to apply all corrections"
+  },
+  "dismiss": {
+    "message": "Fechar",
+    "description": "Button to close overlay without changes"
+  },
+  "cancel": {
+    "message": "Cancelar",
+    "description": "Button to cancel in-progress check"
+  },
+  "no_text_found": {
+    "message": "Nenhum texto encontrado neste campo.",
+    "description": "Error when text field is empty"
+  },
+  "no_internet": {
+    "message": "Sem conexão com a internet.",
+    "description": "Error when offline"
+  },
+  "set_api_key": {
+    "message": "Configure sua chave de API no popup da extensão.",
+    "description": "Error when API key is missing"
+  },
+  "native_language": {
+    "message": "Idioma nativo",
+    "description": "Label for language selector in popup"
+  },
+  "shortcut": {
+    "message": "Atalho de teclado",
+    "description": "Label for keyboard shortcut in popup"
+  },
+  "api_key": {
+    "message": "Chave de API",
+    "description": "Label for API key input in popup"
+  },
+  "corrections_this_week": {
+    "message": "Correções esta semana",
+    "description": "Stat label in popup"
+  },
+  "top_fix": {
+    "message": "Correção mais frequente",
+    "description": "Most common correction category in popup"
+  }
+}

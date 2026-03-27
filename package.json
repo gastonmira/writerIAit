@@ -1,0 +1,60 @@
+{
+  "name": "writeai",
+  "displayName": "__MSG_ext_name__",
+  "version": "0.1.0",
+  "description": "__MSG_ext_description__",
+  "author": "gastonmira",
+  "scripts": {
+    "predev": "mkdir -p build/chrome-mv3-dev && cp -r _locales build/chrome-mv3-dev/",
+    "dev": "plasmo dev",
+    "build": "plasmo build && cp -r _locales build/chrome-mv3-prod/",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "plasmo": "0.90.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/chrome": "^0.0.287",
+    "@types/node": "^22.0.0",
+    "@types/react": "18.3.1",
+    "@types/react-dom": "18.3.1",
+    "@vitest/coverage-v8": "^2.0.0",
+    "jsdom": "^25.0.0",
+    "playwright": "^1.49.0",
+    "typescript": "5.6.3",
+    "vitest": "^2.0.0"
+  },
+  "manifest": {
+    "commands": {
+      "fix-english": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+K",
+          "mac": "Command+Shift+K"
+        },
+        "description": "Fix English in current text field"
+      }
+    },
+    "permissions": [
+      "storage",
+      "activeTab",
+      "scripting"
+    ],
+    "default_locale": "en"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "esbuild",
+      "lmdb",
+      "msgpackr-extract",
+      "sharp"
+    ]
+  }
+}

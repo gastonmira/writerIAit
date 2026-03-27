@@ -1,0 +1,8 @@
+node_modules/
+.plasmo/
+build/
+*.zip
+.DS_Store
+*.pem
+.env
+.env.local
