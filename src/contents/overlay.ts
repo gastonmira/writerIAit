@@ -14,7 +14,7 @@ export const config: PlasmoCSConfig = {
 // All tokens from DESIGN.md. Shadow DOM needs its own media query for dark mode.
 
 const SHADOW_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :host {
     --bg: #ffffff;
