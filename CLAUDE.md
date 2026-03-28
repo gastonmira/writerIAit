@@ -6,7 +6,7 @@ Chrome extension (Plasmo + TypeScript + React) for grammar correction for non-na
 ## Architecture
 - `src/core/corrector.ts` — pure correction logic, NO chrome.* imports (v3 portability)
 - `src/background/index.ts` — service worker, handles LLM API calls
-- `src/contents/overlay.tsx` — content script, injects shadow DOM overlay
+- `src/contents/overlay.ts` — content script, injects shadow DOM overlay
 - `src/popup/index.tsx` — extension popup (360px settings panel)
 
 ## LLM Providers

@@ -9,10 +9,12 @@ Designed for Spanish/Portuguese-speaking professionals writing emails, Slack mes
 ## Features
 
 - **Keyboard shortcut** (`Cmd+Shift+K` / `Ctrl+Shift+K`) — trigger from any text field
-- **Diff overlay** — shows original vs corrected text side-by-side with strikethrough/underline
+- **Three check modes** — Correct (fix grammar + spelling), Improve (more natural phrasing), Rewrite (professional / friendly / concise)
+- **Inline diff mode** — per-correction accept/reject with strikethrough/underline spans; or use the carousel for one-at-a-time review
 - **Teaching Mode** — every correction includes a reason so you learn the rule
 - **Native language support** — Spanish, Portuguese, French, German, Arabic, Chinese transfer errors detected
 - **Tone detection** — adapts to Gmail (professional), Slack (casual business), GitHub (technical)
+- **Gmail + contenteditable support** — works in Gmail compose, Notion, LinkedIn, and other rich text editors
 - **Undo toast** — one-click undo after accepting corrections
 - **Four LLM backends** — OpenAI, Anthropic, Gemini (free), Groq (free)
 - **Privacy-first** — text is sent only to your chosen API provider; no servers in between
@@ -100,7 +102,8 @@ src/
   popup/index.tsx         # Settings panel (360px)
   types.ts                # Shared types
 e2e/
-  correction-flow.spec.ts # Playwright E2E tests
+  correction-flow.spec.ts  # Playwright E2E tests (7 tests)
+  cross-site-agent.spec.ts # Cross-site tests: GitHub, Gmail, Twitter/X, LinkedIn, Notion (6 tests)
 _locales/
   en/messages.json        # English strings
   es/messages.json        # Spanish strings
@@ -121,6 +124,9 @@ pnpm test:coverage
 # E2E tests (requires pnpm build first)
 pnpm build
 pnpm test:e2e
+
+# Cross-site E2E tests (GitHub, Gmail, Twitter/X, LinkedIn, Notion)
+pnpm test:e2e:cross
 ```
 
 ---

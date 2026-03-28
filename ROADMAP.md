@@ -10,10 +10,17 @@
 - ✅ **Bottom-right positioning** — overlay anchors to the bottom-right of the textarea instead of covering the text
 - ✅ **Version in popup** — `v0.1.0` shown next to Active status in the popup header
 - ✅ **Onboarding wizard** — 3-step first-run flow (choose provider → API key → done), guides users to free providers first
+- ✅ **Check modes** — Correct (grammar + spelling), Improve (natural phrasing), Rewrite (professional / friendly / concise)
+- ✅ **Inline diff mode** — red/green diffs shown in text field; click to accept/skip individually; toggle between Inline and Explained modes in popup settings
+- ✅ **Gmail + contenteditable support** — scroll, paragraph breaks, mirror gaps, focus all fixed
+- ✅ **Extension context invalidated** — clear user-facing message instead of crash; prompts "please reload the page"
+- ✅ **Spelling detection** — correction prompt explicitly catches spelling errors; small models (Groq/llama) no longer miss "helo", "agan"
+- ✅ **Overlay scroll positioning** — overlay anchors correctly when user has scrolled the page
+- ✅ **Cross-site E2E agent** — 6 Playwright tests covering GitHub PR, Gmail compose, Twitter/X, LinkedIn, Notion (mocked API, dark + light themes)
 
 ## High Impact / Quick Wins
 
-- **E2E test coverage** — expand Playwright suite to cover all untested flows. Existing: 7 correction-flow tests. Missing:
+- **E2E test coverage** — expand Playwright suite to cover remaining untested flows. Existing: 7 correction-flow tests + 6 cross-site-agent tests. Still missing:
 
   **`e2e/onboarding.spec.ts`**
   - First run: wizard opens on Step 1 (no `hasOnboarded` in storage)
@@ -30,7 +37,6 @@
   - `Esc` dismisses overlay without changes
   - Undo toast appears after Accept All, clicking it restores original text
   - Works on `<input type="text">` (not just textarea)
-  - Works on `contenteditable` div
 
   **`e2e/popup.spec.ts`**
   - Changing native language saves to sync storage
@@ -40,17 +46,12 @@
 
 ## Product Depth
 
-- **Check modes** — let the user choose the type of check before triggering the shortcut (or via a quick picker in the overlay):
-  - ✏️ **Correct** *(default, Grammarly-style)* — fix grammar and spelling, keep the original meaning intact
-  - ✨ **Improve** — keep the meaning but make it more natural, better phrasing, improved fluency
-  - 🎯 **Rewrite with intent** — transform tone on demand: "more professional", "more friendly", "more concise". Each intent maps to a different system prompt instruction.
 - **Error highlighting** — underline errors directly in the text field while the overlay is open, so the user sees exactly where they are
 - **Learning patterns** — the stats panel already tracks corrections; surface insights like "you often miss apostrophes in contractions" in the popup
 
 ## Reliability / Polish
 
-- **Handle "Extension context invalidated" crash** — after the extension is reloaded/updated, the content script loses its runtime connection and throws `Uncaught Error: Extension context invalidated` when `chrome.runtime.connect()` is called in the overlay. Fix: catch the error in `overlay.ts`, tear down the content script gracefully, and show a "please reload the page" nudge instead of crashing. Repro: load the extension, trigger an overlay, reload the extension in `chrome://extensions`, then trigger again.
-- **More apps** — Notion, Linear, Twitter/X (contenteditable already works, but tone detection doesn't know about them)
+- **More apps** — tone detection (`TONE_MAP` in `corrector.ts`) doesn't know about Notion, Linear, Twitter/X yet. Contenteditable already works — just needs hostname entries added.
 
 ## Cost Efficiency
 
@@ -60,5 +61,4 @@
 
 ## Bigger Swings
 
-- ✅ **Inline diff mode** — red/green diffs shown directly in the text field; click individual spans to accept/skip; toggle between Inline and Explained (carousel) in popup settings
 - **On-device model** — use WebLLM or a local Ollama instance so text never leaves the machine
