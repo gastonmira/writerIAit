@@ -414,6 +414,65 @@ function setTextContent(el: HTMLElement, correctedText: string): void {
   }
 }
 
+// ─── Surgical contenteditable text replacement ─────────────────────────────
+// Walks visible text nodes only (skips aria-hidden and CSS-hidden elements)
+// and uses the Range API to replace only the matching characters.
+// Never touches el.innerHTML — Gmail's DOM structure is preserved entirely.
+
+function replaceTextInContentEditable(
+  el: HTMLElement,
+  original: string,
+  replacement: string
+): boolean {
+  interface NodeEntry { node: Text; startInFull: number }
+
+  const filter: NodeFilter = {
+    acceptNode(node: Node): number {
+      let parent = node.parentElement
+      while (parent && parent !== el) {
+        if (parent.getAttribute("aria-hidden") === "true") return NodeFilter.FILTER_REJECT
+        const cs = window.getComputedStyle(parent)
+        if (cs.display === "none" || cs.visibility === "hidden") return NodeFilter.FILTER_REJECT
+        parent = parent.parentElement
+      }
+      return NodeFilter.FILTER_ACCEPT
+    }
+  }
+
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, filter)
+  const entries: NodeEntry[] = []
+  let fullText = ""
+
+  let node = walker.nextNode() as Text | null
+  while (node) {
+    entries.push({ node, startInFull: fullText.length })
+    fullText += node.textContent ?? ""
+    node = walker.nextNode() as Text | null
+  }
+
+  const idx = fullText.indexOf(original)
+  if (idx === -1) return false
+
+  const matchEnd = idx + original.length
+
+  // Find the entry whose range contains the start offset
+  let startEntry: NodeEntry | null = null
+  let endEntry: NodeEntry | null = null
+  for (let i = entries.length - 1; i >= 0; i--) {
+    if (endEntry === null && entries[i].startInFull < matchEnd) endEntry = entries[i]
+    if (startEntry === null && entries[i].startInFull <= idx) { startEntry = entries[i]; break }
+  }
+  if (!startEntry || !endEntry) return false
+
+  const range = document.createRange()
+  range.setStart(startEntry.node, idx - startEntry.startInFull)
+  range.setEnd(endEntry.node, matchEnd - endEntry.startInFull)
+  range.deleteContents()
+  range.insertNode(document.createTextNode(replacement))
+  el.dispatchEvent(new InputEvent("input", { bubbles: true, cancelable: true }))
+  return true
+}
+
 // ─── Inline diff helpers ───────────────────────────────────────────────────
 // buildDiffHtml is imported from core/corrector (pure, testable)
 
@@ -456,7 +515,7 @@ function removeDiffStyles(): void {
 }
 
 function createTextareaMirror(
-  el: HTMLTextAreaElement | HTMLInputElement,
+  el: HTMLElement,
   corrections: Correction[]
 ): void {
   const rect = el.getBoundingClientRect()
@@ -496,6 +555,11 @@ function createTextareaMirror(
       letter-spacing: ${cs.letterSpacing} !important;
       word-spacing: ${cs.wordSpacing} !important;
     }
+    #writeai-mirror-el .writeai-del,
+    #writeai-mirror-el .writeai-ins {
+      font-family: inherit !important;
+      padding: 0 !important;
+    }
   `
   document.head.appendChild(mirrorStyle)
 
@@ -504,7 +568,10 @@ function createTextareaMirror(
   const div = document.createElement("div")
   div.id = "writeai-mirror-el"
   div.setAttribute("aria-hidden", "true")
-  div.innerHTML = buildDiffHtml(el.value, corrections)
+  const sourceText = (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement)
+    ? el.value
+    : el.innerText
+  div.innerHTML = buildDiffHtml(sourceText, corrections)
   document.body.appendChild(div)
   mirrorEl = div
 
@@ -516,33 +583,18 @@ function createTextareaMirror(
   el.style.caretColor = "transparent"
 }
 
-function injectContentEditableDiff(el: HTMLElement, corrections: Correction[]): void {
-  contentEditableSnapshot = el.innerHTML
-  injectDiffStyles()
-  el.innerHTML = buildDiffHtml(el.innerText, corrections)
-}
-
 function removeInlineDiff(el: HTMLElement): void {
-  if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) {
-    if (inlineDiffClickHandler) {
-      mirrorEl?.removeEventListener("click", inlineDiffClickHandler)
-    }
-    mirrorEl?.remove()
-    mirrorEl = null
-    document.getElementById("writeai-mirror-style")?.remove()
-    el.style.color = savedElColor ?? ""
-    el.style.caretColor = savedElCaretColor ?? ""
-    savedElColor = null
-    savedElCaretColor = null
-  } else {
-    if (inlineDiffClickHandler) {
-      el.removeEventListener("click", inlineDiffClickHandler)
-    }
-    if (contentEditableSnapshot !== null) {
-      el.innerHTML = contentEditableSnapshot
-      contentEditableSnapshot = null
-    }
+  // All element types (textarea, input, contenteditable) use the mirror approach.
+  if (inlineDiffClickHandler) {
+    mirrorEl?.removeEventListener("click", inlineDiffClickHandler)
   }
+  mirrorEl?.remove()
+  mirrorEl = null
+  document.getElementById("writeai-mirror-style")?.remove()
+  el.style.color = savedElColor ?? ""
+  el.style.caretColor = savedElCaretColor ?? ""
+  savedElColor = null
+  savedElCaretColor = null
   inlineDiffClickHandler = null
   removeDiffStyles()
   if (resizeHandler) {
@@ -1045,7 +1097,7 @@ function renderInlineDiff(
   allCorrections: Correction[],
   baseText: string,
   iframeRect: DOMRect | null,
-  onFinalAccept: (finalText: string) => void,
+  onFinalAccept: (finalText: string, acceptedCorrections: Correction[]) => void,
   onDismiss: () => void
 ): void {
   // Re-lock element for the duration of diff display
@@ -1072,12 +1124,7 @@ function renderInlineDiff(
 
   function rebuildDisplay() {
     const currentText = getCurrentText()
-    if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) {
-      if (mirrorEl) mirrorEl.innerHTML = buildDiffHtml(currentText, remaining)
-    } else {
-      // Rebuild contenteditable inline spans
-      el.innerHTML = buildDiffHtml(currentText, remaining)
-    }
+    if (mirrorEl) mirrorEl.innerHTML = buildDiffHtml(currentText, remaining)
     updateLabel()
   }
 
@@ -1107,18 +1154,16 @@ function renderInlineDiff(
 
     if (remaining.length === 0) {
       // All resolved — brief pause so user sees the final state, then finish
-      setTimeout(() => onFinalAccept(getCurrentText()), 400)
+      setTimeout(() => onFinalAccept(getCurrentText(), [...accepted]), 400)
     }
   }
 
   // ── Mount diff display ──────────────────────────────────────────────────────
-  if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) {
-    createTextareaMirror(el, remaining)
-    mirrorEl?.addEventListener("click", inlineDiffClickHandler)
-  } else {
-    injectContentEditableDiff(el, remaining)
-    el.addEventListener("click", inlineDiffClickHandler)
-  }
+  // All element types (textarea, input, contenteditable) use the mirror overlay.
+  // This avoids touching el.innerHTML for contenteditable (Gmail, Notion, etc.)
+  // which would destroy the host app's DOM structure and event listeners.
+  createTextareaMirror(el, remaining)
+  mirrorEl?.addEventListener("click", inlineDiffClickHandler)
 
   // getOrCreateHost (inside renderInlineActionBar) calls removeOverlay(),
   // which removes the loading/checking overlay — this is intentional
@@ -1126,7 +1171,7 @@ function renderInlineDiff(
     el,
     remaining.length,
     iframeRect,
-    () => onFinalAccept(applyCorrections(baseText, [...accepted, ...remaining])),
+    () => onFinalAccept(applyCorrections(baseText, [...accepted, ...remaining]), [...accepted, ...remaining]),
     onDismiss
   )
 
@@ -1295,11 +1340,18 @@ async function handleTrigger(): Promise<void> {
         corrections,
         text,
         iframeRect,
-        (finalText) => {
+        (finalText, acceptedCorrections) => {
           unlockElement()
           if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
           removeOverlay()
-          setTextContent(el, finalText)
+          if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+            setTextContent(el, finalText)
+          } else {
+            el.focus()
+            for (const c of acceptedCorrections) {
+              replaceTextInContentEditable(el, c.original, c.replacement)
+            }
+          }
           recordStats(corrections)
           showUndoToast(el, text, el, iframeRect)
         },
@@ -1316,6 +1368,7 @@ async function handleTrigger(): Promise<void> {
 
       const onDismissWithToast = () => {
         removeOverlay()
+        el.focus()
         if (undoSnapshot !== null) {
           const snap = undoSnapshot
           undoSnapshot = null
@@ -1328,15 +1381,25 @@ async function handleTrigger(): Promise<void> {
         corrections,
         (c) => {
           undoSnapshot = getTextContent(el)
-          const correctedText = applyCorrections(undoSnapshot, [c])
-          setTextContent(el, correctedText)
+          if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+            setTextContent(el, applyCorrections(undoSnapshot, [c]))
+          } else {
+            el.focus()
+            replaceTextInContentEditable(el, c.original, c.replacement)
+          }
           recordStats([c])
         },
         () => {
           undoSnapshot = null
           removeOverlay()
-          const correctedText = applyCorrections(text, corrections)
-          setTextContent(el, correctedText)
+          if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+            setTextContent(el, applyCorrections(text, corrections))
+          } else {
+            el.focus()
+            for (const c of corrections) {
+              replaceTextInContentEditable(el, c.original, c.replacement)
+            }
+          }
           recordStats(corrections)
           showUndoToast(el, text, el, iframeRect)
         },
