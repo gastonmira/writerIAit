@@ -637,6 +637,8 @@ function getOrCreateHost(anchorEl: HTMLElement, iframeRect: DOMRect | null = nul
 
   const host = document.createElement("div")
   host.id = "writeai-overlay-host"
+  host.setAttribute("role", "dialog")
+  host.setAttribute("aria-label", "WriteAI corrections")
 
   // Position via className, not style="" — Gmail CSP blocks inline styles
   // We position via a stylesheet injected at the document level
