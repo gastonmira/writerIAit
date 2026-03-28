@@ -1,7 +1,7 @@
 {
   "name": "writeai",
   "displayName": "__MSG_ext_name__",
-  "version": "0.2.0",
+  "version": "0.2.0.0",
   "description": "__MSG_ext_description__",
   "author": "gastonmira",
   "scripts": {
@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test correction-flow",
+    "test:e2e:cross": "playwright test cross-site-agent"
   },
   "dependencies": {
     "plasmo": "0.90.5",

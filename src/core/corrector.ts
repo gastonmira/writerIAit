@@ -56,7 +56,8 @@ ${languageInstruction}
 
 The text should read as ${tone}.
 
-Find ALL grammar errors, including:
+Find ALL grammar and spelling errors, including:
+- Spelling errors (e.g. "helo" → "hello", "agan" → "again", "recieve" → "receive")
 - Missing apostrophes in contractions (e.g. "im" → "I'm", "dont" → "don't", "its" → "it's")
 - Missing or wrong pronouns (e.g. "and m wrong" → "and I'm wrong")
 - Subject-verb agreement, tense, word choice, and phrasing errors

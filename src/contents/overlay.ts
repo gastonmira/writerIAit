@@ -14,7 +14,7 @@ export const config: PlasmoCSConfig = {
 // All tokens from DESIGN.md. Shadow DOM needs its own media query for dark mode.
 
 const SHADOW_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :host {
     --bg: #ffffff;
@@ -25,6 +25,8 @@ const SHADOW_CSS = `
     --muted: #94a3b8;
     --accent: #2563eb;
     --accent-hover: #1d4ed8;
+    --error: #dc2626;
+    --success: #16a34a;
     --del-bg: #fee2e2;
     --del-text: #991b1b;
     --ins-bg: #dcfce7;
@@ -49,6 +51,8 @@ const SHADOW_CSS = `
       --muted: #64748b;
       --accent: #3b82f6;
       --accent-hover: #60a5fa;
+      --error: #f87171;
+      --success: #4ade80;
       --del-bg: #450a0a;
       --del-text: #fca5a5;
       --ins-bg: #052e16;
@@ -637,13 +641,15 @@ function getOrCreateHost(anchorEl: HTMLElement, iframeRect: DOMRect | null = nul
 
   const host = document.createElement("div")
   host.id = "writeai-overlay-host"
+  host.setAttribute("role", "dialog")
+  host.setAttribute("aria-label", "WriteAI corrections")
 
   // Position via className, not style="" — Gmail CSP blocks inline styles
   // We position via a stylesheet injected at the document level
   // When the element is inside an iframe, add the iframe's offset.
   const styleEl = document.createElement("style")
-  const iframeTop = iframeRect ? iframeRect.top + window.scrollY : 0
-  const iframeLeft = iframeRect ? iframeRect.left + window.scrollX : 0
+  const iframeTop = iframeRect ? iframeRect.top + window.scrollY : window.scrollY
+  const iframeLeft = iframeRect ? iframeRect.left + window.scrollX : window.scrollX
   const top = Math.round(anchorBottom + iframeTop + 8)
   const width = Math.min(480, window.innerWidth - 32)
   // Right-align to the textarea's right edge so the overlay doesn't cover text
@@ -708,8 +714,8 @@ function showUndoToast(
   removeToast()
 
   const elRect = anchorEl.getBoundingClientRect()
-  const iframeTop = iframeRect ? iframeRect.top + window.scrollY : 0
-  const iframeLeft = iframeRect ? iframeRect.left + window.scrollX : 0
+  const iframeTop = iframeRect ? iframeRect.top + window.scrollY : window.scrollY
+  const iframeLeft = iframeRect ? iframeRect.left + window.scrollX : window.scrollX
   const top = Math.round(elRect.bottom + iframeTop + 8)
   const width = Math.min(480, window.innerWidth - 32)
   const rawLeft = Math.round(elRect.right + iframeLeft) - width
