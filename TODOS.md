@@ -11,7 +11,7 @@ Playwright suite covers correction flow basics but is missing:
 - `e2e/onboarding.spec.ts` — full onboarding wizard flow
 - Keyboard nav tests: `←`/`→`, `Enter`, `A`, `Esc`
 - Undo toast tests
-- `<input>` and `contenteditable` element tests
+- `<input>` element tests
 - `e2e/popup.spec.ts` — settings persistence tests
 
 ## Content Script / Overlay
@@ -44,3 +44,9 @@ Token-minimized prompt variant for paid providers — ~35% fewer input tokens, z
 - ✅ Check modes (correct, improve, rewrite)
 - ✅ Gmail contenteditable support (scroll, paragraph breaks, mirror gaps, focus)
 - ✅ Extension context invalidated — clear user-facing message
+- ✅ Spelling detection — prompt explicitly lists spelling errors (fixes Groq/small model gap)
+- ✅ Overlay scroll positioning — `window.scrollY/X` offset for non-iframe elements
+- ✅ ARIA accessibility — `role="dialog"` + `aria-label` on overlay host
+- ✅ Color tokens — `--error` / `--success` in shadow DOM CSS
+- ✅ Font weight — JetBrains Mono `wght@400;500`
+- ✅ Cross-site E2E agent — 6 tests (GitHub, Gmail, contact form, Twitter/X, LinkedIn, Notion)

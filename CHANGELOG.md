@@ -2,6 +2,23 @@
 
 All notable changes to WriteAI are documented here.
 
+## [0.2.0.0] - 2026-03-28 — Spelling + Scroll + Design Polish
+
+### Fixed
+- **Spelling detection** — correction prompt now explicitly lists spelling errors; small models (Groq/llama) no longer return "looks good" on "helo thanks agan"
+- **Overlay scroll positioning** — overlay no longer floats near top of page when user has scrolled down; `window.scrollY`/`window.scrollX` offset applied correctly for both `getOrCreateHost` and `showUndoToast`
+- **Undo toast scroll position** — same scroll offset fix applied to undo toast placement
+
+### Design
+- **ARIA accessibility** — overlay host now has `role="dialog"` and `aria-label="WriteAI corrections"` (screen reader support)
+- **Color tokens** — added `--error` (#dc2626 / #f87171 dark) and `--success` (#16a34a / #4ade80 dark) to shadow DOM CSS
+- **Font weight** — JetBrains Mono loads `wght@400;500` per design spec (was 400-only)
+
+### Infrastructure
+- **Cross-site E2E agent** — 6 Playwright tests covering GitHub PR, Gmail compose, contact form, Twitter/X, LinkedIn, Notion (all mocked, load-extension, dark + light themes)
+
+---
+
 ## [0.1.0.0] - 2026-03-28 — Alpha Release
 
 ### Added
