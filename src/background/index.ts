@@ -8,6 +8,16 @@ import type { CheckTextMessage, CheckTextResponse, LLMProvider } from "../types"
 
 const abortControllers = new Map<number, AbortController>()
 
+// ─── Icon helpers ──────────────────────────────────────────────────────────
+
+const ICON_ACTIVE = { "16": "icon16-active.png", "32": "icon32-active.png", "48": "icon48-active.png", "128": "icon128-active.png" }
+const ICON_INACTIVE = { "16": "icon16.png", "32": "icon32.png", "48": "icon48.png", "128": "icon128.png" }
+
+function setTabIcon(tabId: number, active: boolean) {
+  if (tabId < 0) return
+  chrome.action.setIcon({ tabId, path: active ? ICON_ACTIVE : ICON_INACTIVE }).catch(() => {})
+}
+
 // ─── Command relay ─────────────────────────────────────────────────────────
 // MV3: commands fire in service worker, must relay to content script
 
@@ -57,6 +67,7 @@ async function handleCheckText(
 
   const controller = new AbortController()
   abortControllers.set(tabId, controller)
+  setTabIcon(tabId, true)
 
   try {
     const systemPrompt = buildSystemPrompt(nativeLanguage, tone, mode, rewriteIntent)
@@ -79,6 +90,7 @@ async function handleCheckText(
     return { error: `API request failed: ${msg}` }
   } finally {
     abortControllers.delete(tabId)
+    setTabIcon(tabId, false)
   }
 }
 

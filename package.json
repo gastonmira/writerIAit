@@ -7,7 +7,7 @@
   "scripts": {
     "predev": "mkdir -p build/chrome-mv3-dev && cp -r _locales build/chrome-mv3-dev/",
     "dev": "plasmo dev",
-    "build": "plasmo build && cp -r _locales build/chrome-mv3-prod/",
+    "build": "plasmo build && cp -r _locales build/chrome-mv3-prod/ && cp public/*.png build/chrome-mv3-prod/",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
