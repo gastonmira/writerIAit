@@ -134,6 +134,12 @@ pnpm test:e2e
 
 ---
 
+## Built with AI
+
+This project uses [gstack](https://github.com/garrytan/gstack) — an open-source AI builder framework — to accelerate development, reviews, and shipping.
+
+---
+
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md).
