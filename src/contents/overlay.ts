@@ -25,6 +25,8 @@ const SHADOW_CSS = `
     --muted: #94a3b8;
     --accent: #2563eb;
     --accent-hover: #1d4ed8;
+    --error: #dc2626;
+    --success: #16a34a;
     --del-bg: #fee2e2;
     --del-text: #991b1b;
     --ins-bg: #dcfce7;
@@ -49,6 +51,8 @@ const SHADOW_CSS = `
       --muted: #64748b;
       --accent: #3b82f6;
       --accent-hover: #60a5fa;
+      --error: #f87171;
+      --success: #4ade80;
       --del-bg: #450a0a;
       --del-text: #fca5a5;
       --ins-bg: #052e16;
