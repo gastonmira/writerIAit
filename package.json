@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test correction-flow",
+    "test:e2e:cross": "playwright test cross-site-agent"
   },
   "dependencies": {
     "plasmo": "0.90.5",
