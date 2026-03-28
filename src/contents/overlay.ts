@@ -642,8 +642,8 @@ function getOrCreateHost(anchorEl: HTMLElement, iframeRect: DOMRect | null = nul
   // We position via a stylesheet injected at the document level
   // When the element is inside an iframe, add the iframe's offset.
   const styleEl = document.createElement("style")
-  const iframeTop = iframeRect ? iframeRect.top + window.scrollY : 0
-  const iframeLeft = iframeRect ? iframeRect.left + window.scrollX : 0
+  const iframeTop = iframeRect ? iframeRect.top + window.scrollY : window.scrollY
+  const iframeLeft = iframeRect ? iframeRect.left + window.scrollX : window.scrollX
   const top = Math.round(anchorBottom + iframeTop + 8)
   const width = Math.min(480, window.innerWidth - 32)
   // Right-align to the textarea's right edge so the overlay doesn't cover text
@@ -708,8 +708,8 @@ function showUndoToast(
   removeToast()
 
   const elRect = anchorEl.getBoundingClientRect()
-  const iframeTop = iframeRect ? iframeRect.top + window.scrollY : 0
-  const iframeLeft = iframeRect ? iframeRect.left + window.scrollX : 0
+  const iframeTop = iframeRect ? iframeRect.top + window.scrollY : window.scrollY
+  const iframeLeft = iframeRect ? iframeRect.left + window.scrollX : window.scrollX
   const top = Math.round(elRect.bottom + iframeTop + 8)
   const width = Math.min(480, window.innerWidth - 32)
   const rawLeft = Math.round(elRect.right + iframeLeft) - width
