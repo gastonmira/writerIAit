@@ -15,6 +15,7 @@ Designed for Spanish/Portuguese-speaking professionals writing emails, Slack mes
 - **Native language support** — Spanish, Portuguese, French, German, Arabic, Chinese transfer errors detected
 - **Tone detection** — adapts to Gmail (professional), Slack (casual business), GitHub (technical)
 - **Gmail + contenteditable support** — works in Gmail compose, Notion, LinkedIn, and other rich text editors
+- **Smart re-trigger** — pressing the shortcut again on unchanged text replays the last result instantly, no extra API call
 - **Undo toast** — one-click undo after accepting corrections
 - **Four LLM backends** — OpenAI, Anthropic, Gemini (free), Groq (free)
 - **Privacy-first** — text is sent only to your chosen API provider; no servers in between
@@ -97,13 +98,18 @@ API keys are stored in `chrome.storage.local` — never synced across devices.
 ```
 src/
   core/corrector.ts       # Pure correction logic — no chrome.* imports
-  background/index.ts     # Service worker: LLM API calls, command relay
+  background/index.ts     # Service worker: LLM API calls, command relay, icon switching
   contents/overlay.ts     # Content script: shadow DOM overlay
   popup/index.tsx         # Settings panel (360px)
   types.ts                # Shared types
 e2e/
   correction-flow.spec.ts  # Playwright E2E tests (7 tests)
   cross-site-agent.spec.ts # Cross-site tests: GitHub, Gmail, Twitter/X, LinkedIn, Notion (6 tests)
+assets/
+  icon*.png               # Default (idle) toolbar icons — picked up by Plasmo manifest
+public/
+  icon*-active.png        # Active icons (blue, shown during API call) — copied to build root
+  icon*.png               # Inactive icons (grey) — used for explicit reset via chrome.action.setIcon
 _locales/
   en/messages.json        # English strings
   es/messages.json        # Spanish strings
@@ -137,6 +143,8 @@ pnpm test:e2e:cross
 - **Element safety** — the target text field is locked (`readOnly = true`) during the LLM call and always restored in `try/finally`
 - **Shadow DOM** — the overlay is injected into a shadow root to prevent style conflicts with host pages (Gmail, Slack, GitHub)
 - **Dark mode** — handled via CSS `@media (prefers-color-scheme: dark)` inside the shadow DOM, not JS
+- **Re-trigger cache** — a per-element in-memory cache replays the last correction result when the shortcut is pressed again on unchanged text, preventing a second LLM call that could return empty on free-tier models
+- **Icon state** — toolbar icon switches to grey while the API call runs (`chrome.action.setIcon`), returns to blue when done; managed in `background/index.ts` around `handleCheckText`
 
 ---
 

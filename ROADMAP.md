@@ -17,6 +17,8 @@
 - ✅ **Spelling detection** — correction prompt explicitly catches spelling errors; small models (Groq/llama) no longer miss "helo", "agan"
 - ✅ **Overlay scroll positioning** — overlay anchors correctly when user has scrolled the page
 - ✅ **Cross-site E2E agent** — 6 Playwright tests covering GitHub PR, Gmail compose, Twitter/X, LinkedIn, Notion (mocked API, dark + light themes)
+- ✅ **Active/inactive icon switching** — toolbar icon goes grey while the LLM call runs, returns to blue when done; blue is the default idle state
+- ✅ **Re-trigger cache** — pressing the shortcut again on unchanged text replays previous corrections instantly instead of making a second API call (fixes false "Looks good!" on free-tier models)
 
 ## High Impact / Quick Wins
 
