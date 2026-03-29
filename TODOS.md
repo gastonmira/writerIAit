@@ -50,3 +50,5 @@ Token-minimized prompt variant for paid providers — ~35% fewer input tokens, z
 - ✅ Color tokens — `--error` / `--success` in shadow DOM CSS
 - ✅ Font weight — JetBrains Mono `wght@400;500`
 - ✅ Cross-site E2E agent — 6 tests (GitHub, Gmail, contact form, Twitter/X, LinkedIn, Notion)
+- ✅ Active/inactive icon switching — blue default, grey while LLM call runs
+- ✅ Re-trigger cache — replays previous corrections on same text instead of second LLM call
