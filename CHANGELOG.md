@@ -2,6 +2,20 @@
 
 All notable changes to WriteAI are documented here.
 
+## [0.3.0] - 2026-03-28 — Icons + Re-trigger Cache
+
+### Fixed
+- **False "Looks good!" on re-trigger** — dismissing the overlay and pressing the shortcut again on unchanged text no longer makes a second LLM call that might return empty; previous corrections are replayed from a per-element cache instead. Cache clears when corrections are accepted.
+
+### Changed
+- **Toolbar icon default** — blue (active) icon is now the default; grey switches in only while the LLM call is running, then reverts to blue. Grey-as-default read as "disabled" in testing.
+
+### Added
+- **Active/inactive icon switching** — toolbar icon switches to grey while the API call is in flight, returns to blue when done. Visual confirmation that something is happening.
+- **256px icon** — added for high-DPI displays and Chrome Web Store listing.
+
+---
+
 ## [0.2.0.0] - 2026-03-28 — Spelling + Scroll + Design Polish
 
 ### Fixed
