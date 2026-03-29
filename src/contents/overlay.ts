@@ -615,6 +615,7 @@ let keyboardHandler: ((e: KeyboardEvent) => void) | null = null
 let toastHost: HTMLElement | null = null
 let toastTimer: ReturnType<typeof setTimeout> | null = null
 let lastFocusedEl: HTMLElement | null = null
+let lastCheckCache: { el: HTMLElement; text: string; corrections: Correction[] } | null = null
 
 // ─── Inline diff state ─────────────────────────────────────────────────────
 let mirrorEl: HTMLElement | null = null
@@ -1282,57 +1283,66 @@ async function handleTrigger(): Promise<void> {
     const rewriteIntent = (syncSettings.rewriteIntent ?? "professional") as RewriteIntent
     const correctionView = (syncSettings.correctionView ?? "inline") as CorrectionView
 
-  // Show loading — cancel sends CANCEL_CHECK to background
-  renderLoading(root, () => {
-    unlockElement()
-    removeOverlay()
-    chrome.runtime.sendMessage({ type: "CANCEL_CHECK" }).catch(() => {})
-  }, checkMode, rewriteIntent)
-
-    if (!apiKey) {
+    // Cache hit: same element + same text — skip LLM call, replay previous corrections
+    let corrections: Correction[]
+    if (lastCheckCache && lastCheckCache.el === el && lastCheckCache.text === text && lastCheckCache.corrections.length > 0) {
       unlockElement()
       removeOverlay()
-      const root2 = getOrCreateHost(el, iframeRect)
-      renderError(root2, "Set your API key in the extension popup.", () => {
+      corrections = lastCheckCache.corrections
+    } else {
+      // Show loading — cancel sends CANCEL_CHECK to background
+      renderLoading(root, () => {
         unlockElement()
         removeOverlay()
-      })
-      return
-    }
+        chrome.runtime.sendMessage({ type: "CANCEL_CHECK" }).catch(() => {})
+      }, checkMode, rewriteIntent)
 
-    const nativeLanguage: string = settings.nativeLanguage ?? "Other"
-    const provider = (settings.provider ?? "openai") as "openai" | "anthropic"
-    const tone = detectCurrentTone()
+      if (!apiKey) {
+        unlockElement()
+        removeOverlay()
+        const root2 = getOrCreateHost(el, iframeRect)
+        renderError(root2, "Set your API key in the extension popup.", () => {
+          unlockElement()
+          removeOverlay()
+        })
+        return
+      }
 
-    const msg: CheckTextMessage = {
-      type: "CHECK_TEXT",
-      text,
-      nativeLanguage,
-      tone,
-      apiKey,
-      provider,
-      mode: checkMode,
-      rewriteIntent: rewriteIntent,
-    }
+      const nativeLanguage: string = settings.nativeLanguage ?? "Other"
+      const provider = (settings.provider ?? "openai") as "openai" | "anthropic"
+      const tone = detectCurrentTone()
 
-    const response = await chrome.runtime.sendMessage(msg) as CheckTextResponse
+      const msg: CheckTextMessage = {
+        type: "CHECK_TEXT",
+        text,
+        nativeLanguage,
+        tone,
+        apiKey,
+        provider,
+        mode: checkMode,
+        rewriteIntent: rewriteIntent,
+      }
 
-    if ("error" in response) {
+      const response = await chrome.runtime.sendMessage(msg) as CheckTextResponse
+
+      if ("error" in response) {
+        unlockElement()
+        removeOverlay()
+        if (response.error === "cancelled") return
+
+        const root2 = getOrCreateHost(el, iframeRect)
+        renderError(root2, response.error, () => {
+          unlockElement()
+          removeOverlay()
+        })
+        return
+      }
+
+      corrections = response.corrections
       unlockElement()
       removeOverlay()
-      if (response.error === "cancelled") return
-
-      const root2 = getOrCreateHost(el, iframeRect)
-      renderError(root2, response.error, () => {
-        unlockElement()
-        removeOverlay()
-      })
-      return
+      lastCheckCache = { el, text, corrections }
     }
-
-    const { corrections } = response
-    unlockElement()
-    removeOverlay()
 
     if (corrections.length === 0) {
       const root2 = getOrCreateHost(el, iframeRect)
@@ -1347,6 +1357,7 @@ async function handleTrigger(): Promise<void> {
         text,
         iframeRect,
         (finalText, acceptedCorrections) => {
+          lastCheckCache = null
           unlockElement()
           if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
           removeOverlay()
@@ -1396,6 +1407,7 @@ async function handleTrigger(): Promise<void> {
           recordStats([c])
         },
         () => {
+          lastCheckCache = null
           undoSnapshot = null
           removeOverlay()
           if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
