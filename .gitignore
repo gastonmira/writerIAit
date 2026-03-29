@@ -12,6 +12,7 @@ tsconfig.tsbuildinfo
 
 # Test artifacts
 test-results/
+coverage/
 
 # gstack
 .gstack/
