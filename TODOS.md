@@ -1,5 +1,16 @@
 # TODOS
 
+## Branding
+
+### P1 — Rename extension to writerIAit throughout
+Update the extension name from "WriteAI" to "writerIAit" in all places:
+- `package.json` — `name` field
+- `manifest.json` / Plasmo config — extension name
+- Popup UI — title/header text
+- Overlay mock title
+- All `alt` text and ARIA labels referencing the old name
+- `README.md`
+
 ## Reliability
 
 ### P0 — Undo toast breaks Gmail DOM
