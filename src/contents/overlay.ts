@@ -643,7 +643,7 @@ function getOrCreateHost(anchorEl: HTMLElement, iframeRect: DOMRect | null = nul
   const host = document.createElement("div")
   host.id = "writeai-overlay-host"
   host.setAttribute("role", "dialog")
-  host.setAttribute("aria-label", "WriteAI corrections")
+  host.setAttribute("aria-label", "writerIAit corrections")
 
   // Position via className, not style="" — Gmail CSP blocks inline styles
   // We position via a stylesheet injected at the document level
@@ -987,7 +987,7 @@ function renderLooksGood(root: ShadowRoot, onDismiss: () => void): void {
   header.className = "header"
   header.innerHTML = `
     <div class="logo"><span class="logo-letter">W</span></div>
-    <span class="title">WriteAI</span>
+    <span class="title">writerIAit</span>
   `
   const closeBtn = document.createElement("button")
   closeBtn.className = "btn-close"
@@ -1026,7 +1026,7 @@ function renderError(root: ShadowRoot, message: string, onDismiss: () => void): 
   header.className = "header"
   header.innerHTML = `
     <div class="logo"><span class="logo-letter">W</span></div>
-    <span class="title">WriteAI</span>
+    <span class="title">writerIAit</span>
   `
   const closeBtn = document.createElement("button")
   closeBtn.className = "btn-close"

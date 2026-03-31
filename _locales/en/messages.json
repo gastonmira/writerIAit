@@ -1,6 +1,6 @@
 {
   "ext_name": {
-    "message": "WriteIAit",
+    "message": "writerIAit",
     "description": "Extension name"
   },
   "ext_description": {
@@ -104,7 +104,7 @@
     "description": "Step 3 headline"
   },
   "onboarding_done_sub": {
-    "message": "WriteIAit is active on all pages.",
+    "message": "writerIAit is active on all pages.",
     "description": "Step 3 subtitle"
   },
   "onboarding_shortcut_helper": {
