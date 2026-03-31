@@ -1,16 +1,5 @@
 # TODOS
 
-## Branding
-
-### P1 — Rename extension to writerIAit throughout
-Update the extension name from "WriteAI" to "writerIAit" in all places:
-- `package.json` — `name` field
-- `manifest.json` / Plasmo config — extension name
-- Popup UI — title/header text
-- Overlay mock title
-- All `alt` text and ARIA labels referencing the old name
-- `README.md`
-
 ## Reliability
 
 ### P0 — Undo toast breaks Gmail DOM
@@ -63,3 +52,4 @@ Token-minimized prompt variant for paid providers — ~35% fewer input tokens, z
 - ✅ Cross-site E2E agent — 6 tests (GitHub, Gmail, contact form, Twitter/X, LinkedIn, Notion)
 - ✅ Active/inactive icon switching — blue default, grey while LLM call runs
 - ✅ Re-trigger cache — replays previous corrections on same text instead of second LLM call
+- ✅ Rename extension to `writerIAit` throughout
