@@ -3,11 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="writerIAit — Chrome extension that corrects English grammar and explains why. For non-native speakers. Free, open source, bring your own API key.">
-  <meta property="og:title" content="writerIAit — Grammar correction that teaches you the rule">
-  <meta property="og:description" content="Built for Spanish and Portuguese speakers. Feels like a code review, not a spell checker. Open source, no subscription.">
-  <meta property="og:image" content="../public/icon256-active.png">
-  <title>writerIAit — Grammar correction that teaches you the rule</title>
+  <script>
+    const SITE_URL = "https://example.com"
+    const PAGE_PATH = "/landing/"
+    const PAGE_URL = `${SITE_URL}${PAGE_PATH}`
+    const PAGE_TITLE = "writerIAit — Grammar correction that teaches you the rule"
+    const PAGE_DESCRIPTION =
+      "writerIAit — Chrome extension that corrects English grammar and explains why. For non-native speakers. Free, open source, bring your own API key."
+    const SOCIAL_DESCRIPTION =
+      "Built for Spanish and Portuguese speakers. Feels like a code review, not a spell checker. Open source, no subscription."
+    const SOCIAL_IMAGE_URL = `${SITE_URL}/landing/social-card.svg`
+    const SOCIAL_IMAGE_ALT =
+      "writerIAit social preview card with the tagline Grammar correction that teaches you the rule."
+
+    const escapeHtml = (value) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "writerIAit",
+      applicationCategory: "BrowserApplication",
+      operatingSystem: "Chrome / Chromium",
+      description: PAGE_DESCRIPTION,
+      url: PAGE_URL,
+      image: SOCIAL_IMAGE_URL,
+      isAccessibleForFree: true,
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD"
+      },
+      author: {
+        "@type": "Person",
+        name: "Gaston Mira"
+      }
+    }
+
+    const structuredDataJson = JSON.stringify(structuredData).replace(/</g, "\\u003c")
+
+    document.write(`
+      <title>${escapeHtml(PAGE_TITLE)}</title>
+      <meta name="description" content="${escapeHtml(PAGE_DESCRIPTION)}">
+      <meta name="robots" content="index,follow,max-image-preview:large">
+      <meta name="theme-color" content="#2563eb">
+      <link rel="canonical" href="${escapeHtml(PAGE_URL)}">
+      <meta property="og:type" content="website">
+      <meta property="og:site_name" content="writerIAit">
+      <meta property="og:title" content="${escapeHtml(PAGE_TITLE)}">
+      <meta property="og:description" content="${escapeHtml(SOCIAL_DESCRIPTION)}">
+      <meta property="og:url" content="${escapeHtml(PAGE_URL)}">
+      <meta property="og:image" content="${escapeHtml(SOCIAL_IMAGE_URL)}">
+      <meta property="og:image:alt" content="${escapeHtml(SOCIAL_IMAGE_ALT)}">
+      <meta property="og:image:width" content="1200">
+      <meta property="og:image:height" content="630">
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:title" content="${escapeHtml(PAGE_TITLE)}">
+      <meta name="twitter:description" content="${escapeHtml(SOCIAL_DESCRIPTION)}">
+      <meta name="twitter:image" content="${escapeHtml(SOCIAL_IMAGE_URL)}">
+      <meta name="twitter:image:alt" content="${escapeHtml(SOCIAL_IMAGE_ALT)}">
+      <script type="application/ld+json">${structuredDataJson}<\/script>
+    `)
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -985,7 +1046,7 @@
   <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
   <footer>
     <div class="container footer-inner">
-      <span class="footer-text">MIT License &middot; Made by gastonmira</span>
+      <span class="footer-text">MIT License &middot; Made by Gastón Mira</span>
       <a href="https://github.com/gastonmira/writerIAit" class="footer-link" target="_blank" rel="noopener noreferrer">
         github.com/gastonmira/writerIAit
       </a>
