@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to WriteAI are documented here.
+All notable changes to writerIAit are documented here.
 
 ## [0.3.1] - 2026-04-02 — Undo + Cache Reliability
 

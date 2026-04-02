@@ -1,4 +1,4 @@
-# Design System — WriteAI
+# Design System — writerIAit
 
 ## Product Context
 - **What this is:** A Chrome extension that corrects English grammar for non-native speakers and explains *why* each correction was made, teaching as it goes.

@@ -2,7 +2,6 @@
 
 ## Reliability
 
-
 ### P1 — E2E test coverage gaps
 Playwright suite covers correction flow basics but is missing:
 - `e2e/onboarding.spec.ts` — full onboarding wizard flow

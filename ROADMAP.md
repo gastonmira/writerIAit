@@ -1,4 +1,4 @@
-# WriteIAit — Roadmap
+# writerIAit — Roadmap
 
 ## Shipped
 
@@ -19,6 +19,10 @@
 - ✅ **Cross-site E2E agent** — 6 Playwright tests covering GitHub PR, Gmail compose, Twitter/X, LinkedIn, Notion (mocked API, dark + light themes)
 - ✅ **Active/inactive icon switching** — toolbar icon goes grey while the LLM call runs, returns to blue when done; blue is the default idle state
 - ✅ **Re-trigger cache** — pressing the shortcut again on unchanged text replays previous corrections instantly instead of making a second API call (fixes false "Looks good!" on free-tier models)
+- ✅ **Gmail undo DOM preservation** — "Undo" in the correction toast now restores the exact pre-correction HTML via an innerHTML snapshot, fixing Gmail's paragraph and threading layout
+- ✅ **"All good" false positive fix** — re-scan after accepting + editing now sends the actual current text via real-time `input` event tracking, not a stale DOM snapshot
+- ✅ **Stale cache on dismiss** — `lastCheckCache` cleared in all dismiss paths (inline + carousel), so closed sessions don't bleed into new scans
+- ✅ **Carousel undo snapshot accuracy** — snapshot captured on first accept only, not overwritten on each subsequent accept
 
 ## High Impact / Quick Wins
 
