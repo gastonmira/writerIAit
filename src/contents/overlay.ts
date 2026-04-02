@@ -616,6 +616,8 @@ let toastHost: HTMLElement | null = null
 let toastTimer: ReturnType<typeof setTimeout> | null = null
 let lastFocusedEl: HTMLElement | null = null
 let lastCheckCache: { el: HTMLElement; text: string; corrections: Correction[] } | null = null
+let lastInputEl: HTMLElement | null = null
+let lastInputText: string | null = null
 
 // ─── Inline diff state ─────────────────────────────────────────────────────
 let mirrorEl: HTMLElement | null = null
@@ -710,7 +712,8 @@ function showUndoToast(
   el: HTMLElement,
   previousText: string,
   anchorEl: HTMLElement,
-  iframeRect: DOMRect | null
+  iframeRect: DOMRect | null,
+  htmlSnapshot?: string
 ): void {
   removeToast()
 
@@ -755,7 +758,12 @@ function showUndoToast(
   undoBtn.className = "btn-ghost"
   undoBtn.textContent = "Undo"
   undoBtn.addEventListener("click", () => {
-    setTextContent(el, previousText)
+    if (htmlSnapshot !== undefined) {
+      el.innerHTML = htmlSnapshot
+      el.dispatchEvent(new InputEvent("input", { bubbles: true, cancelable: true }))
+    } else {
+      setTextContent(el, previousText)
+    }
     removeToast()
   })
 
@@ -1245,7 +1253,9 @@ async function handleTrigger(): Promise<void> {
   if (!result) return
   const { el, iframeRect } = result
 
-  const text = getTextContent(el)
+  const text = (lastInputEl === el && lastInputText !== null) ? lastInputText : getTextContent(el)
+  lastInputEl = null
+  lastInputText = null
   if (!text.trim()) {
     // Show error briefly — no lock needed
     const tempHost = document.createElement("div")
@@ -1361,18 +1371,21 @@ async function handleTrigger(): Promise<void> {
           unlockElement()
           if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
           removeOverlay()
+          let htmlSnapshot: string | undefined
           if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
             setTextContent(el, finalText)
           } else {
+            htmlSnapshot = el.innerHTML
             el.focus()
             for (const c of acceptedCorrections) {
               replaceTextInContentEditable(el, c.original, c.replacement)
             }
           }
           recordStats(corrections)
-          showUndoToast(el, text, el, iframeRect)
+          showUndoToast(el, text, el, iframeRect, htmlSnapshot)
         },
         () => {
+          lastCheckCache = null
           unlockElement()
           if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
           removeOverlay()
@@ -1382,14 +1395,18 @@ async function handleTrigger(): Promise<void> {
       // "explained" — original carousel with per-correction reasons
       const root2 = getOrCreateHost(el, iframeRect)
       let undoSnapshot: string | null = null
+      let htmlUndoSnapshot: string | null = null
 
       const onDismissWithToast = () => {
+        lastCheckCache = null
         removeOverlay()
         el.focus()
         if (undoSnapshot !== null) {
           const snap = undoSnapshot
+          const htmlSnap = htmlUndoSnapshot ?? undefined
           undoSnapshot = null
-          setTimeout(() => showUndoToast(el, snap, el, iframeRect), 0)
+          htmlUndoSnapshot = null
+          setTimeout(() => showUndoToast(el, snap, el, iframeRect, htmlSnap), 0)
         }
       }
 
@@ -1397,9 +1414,14 @@ async function handleTrigger(): Promise<void> {
         root2,
         corrections,
         (c) => {
-          undoSnapshot = getTextContent(el)
+          if (undoSnapshot === null) {
+            undoSnapshot = getTextContent(el)
+            if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) {
+              htmlUndoSnapshot = el.innerHTML
+            }
+          }
           if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-            setTextContent(el, applyCorrections(undoSnapshot, [c]))
+            setTextContent(el, applyCorrections(getTextContent(el), [c]))
           } else {
             el.focus()
             replaceTextInContentEditable(el, c.original, c.replacement)
@@ -1410,16 +1432,18 @@ async function handleTrigger(): Promise<void> {
           lastCheckCache = null
           undoSnapshot = null
           removeOverlay()
+          let htmlSnapshot: string | undefined
           if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
             setTextContent(el, applyCorrections(text, corrections))
           } else {
+            htmlSnapshot = el.innerHTML
             el.focus()
             for (const c of corrections) {
               replaceTextInContentEditable(el, c.original, c.replacement)
             }
           }
           recordStats(corrections)
-          showUndoToast(el, text, el, iframeRect)
+          showUndoToast(el, text, el, iframeRect, htmlSnapshot)
         },
         onDismissWithToast,
         checkMode,
@@ -1454,6 +1478,18 @@ function detectCurrentTone(): string {
 document.addEventListener("focusin", (e) => {
   if (isTextElement(e.target as Element)) {
     lastFocusedEl = e.target as HTMLElement
+  }
+}, true)
+
+document.addEventListener("input", (e) => {
+  const target = e.target as HTMLElement
+  if (!isTextElement(target)) return
+  lastInputEl = target
+  lastInputText = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
+    ? target.value
+    : target.innerText
+  if (lastCheckCache && lastCheckCache.el === target) {
+    lastCheckCache = null
   }
 }, true)
 

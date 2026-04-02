@@ -30,6 +30,9 @@ Always restore in `try/finally`. This is the highest-risk bug — never break th
 - Unit: Vitest
 - E2E: Playwright with `--load-extension` flag
 
+## Git Workflow
+Before making ANY code changes, create a feature branch and ask the user to confirm the name (or propose one). Never work directly on `main`. Example: `git checkout -b fix/gmail-undo`. Open a PR via `/ship` only when the user explicitly invokes it.
+
 ## Design System
 Always read DESIGN.md before making any visual or UI decisions.
 All font choices, colors, spacing, and aesthetic direction are defined there.

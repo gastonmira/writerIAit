@@ -2,9 +2,6 @@
 
 ## Reliability
 
-### P0 — Undo toast breaks Gmail DOM
-Undo toast "Undo" button calls `setTextContent(el, previousText)` for contenteditable, which uses `execCommand` and destroys Gmail's internal DOM structure. Workaround: users should avoid Undo in Gmail until fixed.
-**Fix:** Implement `replaceTextInContentEditable` path for undo, same as the accept path.
 
 ### P1 — E2E test coverage gaps
 Playwright suite covers correction flow basics but is missing:
@@ -32,6 +29,8 @@ Token-minimized prompt variant for paid providers — ~35% fewer input tokens, z
 
 ## Completed
 
+- ✅ Gmail undo restores DOM correctly (innerHTML snapshot via `showUndoToast htmlSnapshot`)
+- ✅ "All good" false positive after carousel accept (real-time `input` tracking + cache clearing in all dismiss paths)
 - ✅ Fix React #130 error (renamed overlay.tsx → overlay.ts)
 - ✅ Keyboard shortcuts in overlay (←/→, Enter, A, Esc)
 - ✅ Undo toast
