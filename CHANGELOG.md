@@ -2,6 +2,14 @@
 
 All notable changes to WriteAI are documented here.
 
+## [0.3.1] - 2026-04-02 — Undo + Cache Reliability
+
+### Fixed
+- **Gmail undo restores DOM correctly** — pressing "Undo" in the correction toast now restores the exact pre-correction HTML structure via an innerHTML snapshot instead of `execCommand("selectAll")`, which was destroying Gmail's paragraph and threading layout.
+- **"All good" false positive after carousel accept** — after accepting corrections in the carousel view and manually introducing a new error, re-scanning the text now sends the actual current content to the LLM. Fix: real-time text tracking via an `input` event listener so the scan always uses the most recently typed text even when the DOM value may lag (React-controlled inputs, GitHub PR comments).
+- **Stale cache surviving dismiss** — `lastCheckCache` is now cleared in all overlay dismiss paths (inline diff dismiss and carousel dismiss), preventing stale correction suggestions from persisting after a correction session is closed.
+- **Carousel undo snapshot accuracy** — the pre-correction snapshot is now captured only on the first individual accept in carousel mode, not overwritten on each subsequent accept. This makes "Undo" revert to the truly original text rather than the state just before the last accepted correction.
+
 ## [0.3.0] - 2026-03-28 — Icons + Re-trigger Cache
 
 ### Fixed
