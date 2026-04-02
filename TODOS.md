@@ -12,6 +12,41 @@ Playwright suite covers correction flow basics but is missing:
 
 ## Content Script / Overlay
 
+### P1 — Refactor `overlay.ts` (1,516 lines — needs splitting)
+The file has grown into a monolith. Everything lives in one file: CSS (~300 lines),
+DOM rendering for 6 UI states (loading, carousel, inline diff, looks good, error, undo toast),
+contenteditable replacement logic, iframe piercing, focus tracking, tone detection, and the
+main trigger handler. Specific concerns:
+
+- **CSS blob** (~300 lines, `SHADOW_CSS` string at top) — extract to `overlay.css` or a
+  dedicated `src/contents/overlay-styles.ts` module
+- **Rendering functions** — `renderLoading`, `renderCorrections`, `renderLooksGood`,
+  `renderError`, `renderInlineDiff`, `renderInlineActionBar`, `showUndoToast` are
+  independent UI components; move to `src/contents/components/`
+- **DOM utilities** — `setTextContent`, `replaceTextInContentEditable`,
+  `createTextareaMirror`, `lockElement`/`unlockElement`, `getTextContent`,
+  `isTextElement` belong in a dedicated `src/contents/dom-utils.ts`
+- **State** — 12+ module-level mutable variables (`overlayHost`, `lastCheckCache`,
+  `mirrorEl`, `inlineDiffEl`, etc.) with no encapsulation; a single state object or
+  reducer would make the flow easier to follow and test
+- **`handleTrigger`** (~100 lines) — the core orchestration function mixes cache logic,
+  settings reads, LLM dispatch, and view routing; these are separate concerns
+
+Suggested split:
+```
+src/contents/
+  overlay.ts          # entry point: config, message listener, handleTrigger
+  overlay-styles.ts   # SHADOW_CSS constant
+  dom-utils.ts        # lock/unlock, getTextContent, replaceTextInContentEditable, etc.
+  components/
+    loading.ts
+    carousel.ts
+    inline-diff.ts
+    undo-toast.ts
+    looks-good.ts
+    error.ts
+```
+
 ### P2 — More app support
 Notion, Linear, Twitter/X already work with contenteditable, but tone detection doesn't know about them. Add to `TONE_MAP` in `corrector.ts`.
 
