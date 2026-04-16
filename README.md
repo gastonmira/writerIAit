@@ -34,7 +34,57 @@ Designed for Spanish/Portuguese-speaking professionals writing emails, Slack mes
 
 ---
 
-## Getting Started
+## Install the extension
+
+### For users (production build)
+
+> No Chrome Web Store listing yet — load the extension manually.
+
+**Step 1 — Get the code**
+
+```bash
+git clone https://github.com/gastonmira/writeriait.git
+cd writeriait
+```
+
+**Step 2 — Install dependencies and build**
+
+Requires [Node.js 20+](https://nodejs.org) and [pnpm](https://pnpm.io/installation).
+
+```bash
+pnpm install
+pnpm build
+```
+
+This creates the production folder at `build/chrome-mv3-prod/`.
+
+**Step 3 — Load the extension in Chrome**
+
+1. Open Chrome and go to `chrome://extensions`
+2. Enable **Developer mode** (toggle in the top-right corner)
+3. Click **Load unpacked**
+4. Select the folder `build/chrome-mv3-prod/` inside the cloned repo
+
+The writerIAit icon appears in your toolbar.
+
+**Step 4 — First-time setup**
+
+1. Click the writerIAit icon in the toolbar
+2. Select your **LLM provider** (Gemini and Groq are free)
+3. Paste your **API key**
+4. Choose your **native language**
+
+You're ready — focus any text field and press `Cmd+Shift+K` / `Ctrl+Shift+K`.
+
+> **Which folder to load?**
+> | Folder | Use when |
+> |---|---|
+> | `build/chrome-mv3-prod/` | Daily use — optimized build |
+> | `build/chrome-mv3-dev/` | Developing — hot reload via `pnpm dev` |
+
+---
+
+## Getting Started (development)
 
 ### Prerequisites
 
