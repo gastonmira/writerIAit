@@ -4,6 +4,26 @@
 import { buildSystemPrompt, parseLLMResponse } from "../core/corrector"
 import type { CheckTextMessage, CheckTextResponse, LLMProvider } from "../types"
 
+// ─── Error mapping ────────────────────────────────────────────────────────
+// Pure function — no chrome.* dependencies, no side effects, fully testable.
+
+const RATE_LIMIT_TAG = "RATE_LIMIT"
+
+export function mapErrorToResponse(err: unknown): CheckTextResponse {
+  if (err instanceof Error && err.name === "AbortError") {
+    return { error: "cancelled" }
+  }
+  if (err instanceof Error && err.message === RATE_LIMIT_TAG) {
+    return { error: "Rate limit reached. Wait a minute, or switch provider from the popup." }
+  }
+  if (err instanceof TypeError) {
+    // fetch() network failure
+    return { error: "No internet connection." }
+  }
+  const msg = err instanceof Error ? err.message : String(err)
+  return { error: `API request failed: ${msg}` }
+}
+
 // ─── AbortController registry ─────────────────────────────────────────────
 
 const abortControllers = new Map<number, AbortController>()
@@ -78,16 +98,12 @@ async function handleCheckText(
     console.log("[WriteAI] parsed corrections:", corrections)
     return { corrections }
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") {
-      return { error: "cancelled" }
+    const mapped = mapErrorToResponse(err)
+    if ("error" in mapped && mapped.error !== "cancelled") {
+      const detail = err instanceof Error ? err.message : String(err)
+      console.error("[WriteAI] API error:", detail)
     }
-    if (err instanceof TypeError) {
-      // fetch() network failure
-      return { error: "No internet connection." }
-    }
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error("[WriteAI] API error:", msg)
-    return { error: `API request failed: ${msg}` }
+    return mapped
   } finally {
     abortControllers.delete(tabId)
     setTabIcon(tabId, false)
@@ -134,6 +150,7 @@ async function fetchOpenAI(
     })
   })
 
+  if (res.status === 429) throw new Error(RATE_LIMIT_TAG)
   if (!res.ok) throw new Error(`OpenAI ${res.status}`)
   const data = await res.json()
   return data.choices[0].message.content as string
@@ -163,6 +180,7 @@ async function fetchAnthropic(
     })
   })
 
+  if (res.status === 429) throw new Error(RATE_LIMIT_TAG)
   if (!res.ok) throw new Error(`Anthropic ${res.status}`)
   const data = await res.json()
   return data.content[0].text as string
@@ -185,6 +203,7 @@ async function fetchGemini(
     })
   })
 
+  if (res.status === 429) throw new Error(RATE_LIMIT_TAG)
   if (!res.ok) throw new Error(`Gemini ${res.status}`)
   const data = await res.json()
   return data.candidates[0].content.parts[0].text as string
@@ -214,6 +233,7 @@ async function fetchGroq(
     })
   })
 
+  if (res.status === 429) throw new Error(RATE_LIMIT_TAG)
   if (!res.ok) throw new Error(`Groq ${res.status}`)
   const data = await res.json()
   return data.choices[0].message.content as string
