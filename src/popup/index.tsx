@@ -393,6 +393,7 @@ export default function Popup() {
   const [checkMode, setCheckMode] = useState<CheckMode>("correct")
   const [rewriteIntent, setRewriteIntent] = useState<RewriteIntent>("professional")
   const [correctionView, setCorrectionView] = useState<CorrectionView>("inline")
+  const [showFloatingButton, setShowFloatingButton] = useState(true)
   const [stats, setStats] = useState<WeekStats>({ count: 0, topFix: null })
   const [saved, setSaved] = useState(false)
 
@@ -403,12 +404,13 @@ export default function Popup() {
 
   // Load saved settings + check onboarding flag
   useEffect(() => {
-    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent", "correctionView"]).then(res => {
+    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent", "correctionView", "showFloatingButton"]).then(res => {
       if (res.nativeLanguage) setNativeLanguage(res.nativeLanguage)
       if (res.provider) setProvider(res.provider as LLMProvider)
       if (res.checkMode) setCheckMode(res.checkMode as CheckMode)
       if (res.rewriteIntent) setRewriteIntent(res.rewriteIntent as RewriteIntent)
       if (res.correctionView) setCorrectionView(res.correctionView as CorrectionView)
+      if (typeof res.showFloatingButton === "boolean") setShowFloatingButton(res.showFloatingButton)
     })
     chrome.storage.local.get(["apiKey", "correctionsThisWeek", "weekStart", "reasons", "hasOnboarded"]).then(res => {
       if (res.apiKey) setApiKey(res.apiKey)
@@ -430,6 +432,10 @@ export default function Popup() {
   function handleCorrectionViewChange(val: CorrectionView) {
     setCorrectionView(val)
     chrome.storage.sync.set({ correctionView: val })
+  }
+  function handleFloatingButtonChange(val: boolean) {
+    setShowFloatingButton(val)
+    chrome.storage.sync.set({ showFloatingButton: val })
   }
   function handleRewriteIntentChange(val: RewriteIntent) {
     setRewriteIntent(val)
@@ -725,6 +731,24 @@ export default function Popup() {
             {correctionView === "inline"
               ? "Diffs shown directly in the text field. Click to accept or skip each one."
               : "One correction at a time with explanation. Navigate with arrow keys."}
+          </div>
+        </div>
+
+        <div>
+          <label>Floating button</label>
+          <div className="mode-strip">
+            {([ [true, "On"], [false, "Off"] ] as const).map(([v, label]) => (
+              <button
+                key={String(v)}
+                className={`mode-btn${showFloatingButton === v ? " selected" : ""}`}
+                onClick={() => handleFloatingButtonChange(v)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 5 }}>
+            Shows a small W button next to the focused text field. The keyboard shortcut still works either way.
           </div>
         </div>
 

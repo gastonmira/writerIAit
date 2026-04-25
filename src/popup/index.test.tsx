@@ -303,3 +303,54 @@ describe("normal settings view", () => {
     expect(screen.getByDisplayValue("Friendly")).toBeInTheDocument()
   })
 })
+
+// ─── Floating button toggle ────────────────────────────────────────────────
+
+describe("floating button toggle", () => {
+  it("renders the toggle in the normal settings view, defaulting to On", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    render(<Popup />)
+    await waitFor(() => screen.getByText(/floating button/i))
+
+    const onBtn = screen.getByRole("button", { name: "On" })
+    const offBtn = screen.getByRole("button", { name: "Off" })
+    expect(onBtn).toHaveClass("selected")
+    expect(offBtn).not.toHaveClass("selected")
+  })
+
+  it("clicking Off saves showFloatingButton: false to sync storage", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByText(/floating button/i))
+
+    await user.click(screen.getByRole("button", { name: "Off" }))
+
+    const sync = await chrome.storage.sync.get(["showFloatingButton"])
+    expect(sync.showFloatingButton).toBe(false)
+    expect(screen.getByRole("button", { name: "Off" })).toHaveClass("selected")
+  })
+
+  it("loads showFloatingButton from sync storage on mount", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    await chrome.storage.sync.set({ showFloatingButton: false })
+    render(<Popup />)
+    await waitFor(() => screen.getByText(/floating button/i))
+
+    expect(screen.getByRole("button", { name: "Off" })).toHaveClass("selected")
+    expect(screen.getByRole("button", { name: "On" })).not.toHaveClass("selected")
+  })
+
+  it("clicking On after Off restores the preference", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    await chrome.storage.sync.set({ showFloatingButton: false })
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByText(/floating button/i))
+
+    await user.click(screen.getByRole("button", { name: "On" }))
+
+    const sync = await chrome.storage.sync.get(["showFloatingButton"])
+    expect(sync.showFloatingButton).toBe(true)
+  })
+})

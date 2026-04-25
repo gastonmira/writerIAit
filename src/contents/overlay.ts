@@ -628,7 +628,17 @@ let savedElCaretColor: string | null = null
 let inlineDiffEl: HTMLElement | null = null
 let inlineDiffClickHandler: ((e: Event) => void) | null = null
 
+// ─── Floating button state ─────────────────────────────────────────────────
+let floatingBtnHost: HTMLElement | null = null
+let floatingBtnAnchor: HTMLElement | null = null
+let floatingBtnIframeRect: DOMRect | null = null
+let floatingBtnPositionStyle: HTMLStyleElement | null = null
+let floatingBtnBlurTimer: ReturnType<typeof setTimeout> | null = null
+let floatingBtnReposScheduled = false
+let floatingBtnEnabled = true
+
 function getOrCreateHost(anchorEl: HTMLElement, iframeRect: DOMRect | null = null): ShadowRoot {
+  hideFloatingButton()
   removeOverlay()
 
   // For tall editables (e.g. Gmail), use cursor bottom for vertical placement
@@ -1219,6 +1229,231 @@ async function recordStats(corrections: Correction[]): Promise<void> {
   }
 }
 
+// ─── Floating button ───────────────────────────────────────────────────────
+// Sits at the bottom-right of the focused text field. Click triggers the same
+// correction flow as Ctrl+Shift+K. Coexists with the keyboard shortcut.
+
+const FLOATING_BTN_SIZE = 28
+const FLOATING_BTN_PADDING = 6
+const FLOATING_BTN_VIEWPORT_MARGIN = 16
+const FLOATING_BTN_HIDE_DELAY_MS = 150
+
+interface FloatingBtnViewport {
+  innerWidth: number
+  innerHeight: number
+  scrollX: number
+  scrollY: number
+}
+
+export function computeFloatingBtnPosition(
+  elRect: { top: number; left: number; bottom: number; right: number; width: number; height: number },
+  iframeRect: { top: number; left: number } | null,
+  viewport: FloatingBtnViewport
+): { top: number; left: number } {
+  const offsetTop = (iframeRect?.top ?? 0) + viewport.scrollY
+  const offsetLeft = (iframeRect?.left ?? 0) + viewport.scrollX
+  const rawTop = elRect.bottom + offsetTop - FLOATING_BTN_SIZE - FLOATING_BTN_PADDING
+  const rawLeft = elRect.right + offsetLeft - FLOATING_BTN_SIZE - FLOATING_BTN_PADDING
+  const maxLeft = viewport.innerWidth + viewport.scrollX - FLOATING_BTN_SIZE - FLOATING_BTN_VIEWPORT_MARGIN
+  const minLeft = viewport.scrollX + FLOATING_BTN_VIEWPORT_MARGIN
+  const maxTop = viewport.innerHeight + viewport.scrollY - FLOATING_BTN_SIZE - FLOATING_BTN_VIEWPORT_MARGIN
+  const minTop = viewport.scrollY + FLOATING_BTN_VIEWPORT_MARGIN
+  return {
+    top: Math.round(Math.max(minTop, Math.min(rawTop, maxTop))),
+    left: Math.round(Math.max(minLeft, Math.min(rawLeft, maxLeft)))
+  }
+}
+
+export interface FloatingBtnGuardState {
+  enabled: boolean
+  overlayPresent: boolean
+  lockedElement: HTMLElement | null
+}
+
+export function evaluateFloatingBtnGuard(el: Element | null, state: FloatingBtnGuardState): boolean {
+  if (!state.enabled) return false
+  if (state.overlayPresent) return false
+  if (!isTextElement(el)) return false
+  if (state.lockedElement === el) return false
+  const rect = (el as HTMLElement).getBoundingClientRect()
+  if (rect.width < 40 || rect.height < 16) return false
+  return true
+}
+
+function shouldShowFloatingButton(el: Element | null): boolean {
+  return evaluateFloatingBtnGuard(el, {
+    enabled: floatingBtnEnabled,
+    overlayPresent: overlayHost !== null,
+    lockedElement: lockedElement,
+  })
+}
+
+function getIframeRectFor(el: HTMLElement): DOMRect | null {
+  const ownerWin = el.ownerDocument?.defaultView
+  if (!ownerWin || ownerWin === window) return null
+  try {
+    return ownerWin.frameElement?.getBoundingClientRect() ?? null
+  } catch {
+    return null
+  }
+}
+
+function showFloatingButton(el: HTMLElement, iframeRect: DOMRect | null): void {
+  hideFloatingButton()
+  if (!shouldShowFloatingButton(el)) return
+
+  floatingBtnAnchor = el
+  floatingBtnIframeRect = iframeRect
+
+  const elRect = el.getBoundingClientRect()
+  const pos = computeFloatingBtnPosition(elRect, iframeRect, {
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    scrollX: window.scrollX,
+    scrollY: window.scrollY
+  })
+
+  const styleEl = document.createElement("style")
+  styleEl.id = "writeai-floating-btn-style"
+  styleEl.textContent = `
+    #writeai-floating-btn-host {
+      position: absolute !important;
+      top: ${pos.top}px !important;
+      left: ${pos.left}px !important;
+      width: ${FLOATING_BTN_SIZE}px !important;
+      height: ${FLOATING_BTN_SIZE}px !important;
+      z-index: 2147483646 !important;
+      pointer-events: auto !important;
+    }
+  `
+  document.head.appendChild(styleEl)
+  floatingBtnPositionStyle = styleEl
+
+  const host = document.createElement("div")
+  host.id = "writeai-floating-btn-host"
+  document.body.appendChild(host)
+  floatingBtnHost = host
+
+  const shadow = host.attachShadow({ mode: "open" })
+  const shadowStyle = document.createElement("style")
+  shadowStyle.textContent = `
+    :host {
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :host {
+        --accent: #3b82f6;
+        --accent-hover: #60a5fa;
+      }
+    }
+    button {
+      width: ${FLOATING_BTN_SIZE}px;
+      height: ${FLOATING_BTN_SIZE}px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #ffffff;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: background 120ms ease, transform 120ms ease;
+    }
+    button:hover { background: var(--accent-hover); transform: scale(1.05); }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  `
+  shadow.appendChild(shadowStyle)
+
+  const btn = document.createElement("button")
+  btn.type = "button"
+  btn.setAttribute("aria-label", "Check English with writerIAit")
+  btn.title = "writerIAit (Ctrl+Shift+K)"
+  btn.tabIndex = 0
+  btn.textContent = "W"
+  btn.addEventListener("mousedown", (e) => {
+    e.preventDefault()
+    if (floatingBtnBlurTimer) {
+      clearTimeout(floatingBtnBlurTimer)
+      floatingBtnBlurTimer = null
+    }
+  })
+  btn.addEventListener("click", (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    handleTrigger().catch(err => {
+      unlockElement()
+      removeOverlay()
+      console.error("[WriteAI] handleTrigger error:", err)
+    })
+  })
+  shadow.appendChild(btn)
+}
+
+function hideFloatingButton(): void {
+  if (floatingBtnBlurTimer) {
+    clearTimeout(floatingBtnBlurTimer)
+    floatingBtnBlurTimer = null
+  }
+  floatingBtnPositionStyle?.remove()
+  floatingBtnPositionStyle = null
+  floatingBtnHost?.remove()
+  floatingBtnHost = null
+  floatingBtnAnchor = null
+  floatingBtnIframeRect = null
+}
+
+function updateFloatingButtonPosition(): void {
+  if (!floatingBtnHost || !floatingBtnAnchor || !floatingBtnPositionStyle) return
+  const el = floatingBtnAnchor
+  if (!document.contains(el) && !(el.ownerDocument && el.ownerDocument.contains(el))) {
+    hideFloatingButton()
+    return
+  }
+  if (!shouldShowFloatingButton(el)) {
+    hideFloatingButton()
+    return
+  }
+  const elRect = el.getBoundingClientRect()
+  const iframeRect = getIframeRectFor(el)
+  floatingBtnIframeRect = iframeRect
+  const pos = computeFloatingBtnPosition(elRect, iframeRect, {
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    scrollX: window.scrollX,
+    scrollY: window.scrollY
+  })
+  floatingBtnPositionStyle.textContent = `
+    #writeai-floating-btn-host {
+      position: absolute !important;
+      top: ${pos.top}px !important;
+      left: ${pos.left}px !important;
+      width: ${FLOATING_BTN_SIZE}px !important;
+      height: ${FLOATING_BTN_SIZE}px !important;
+      z-index: 2147483646 !important;
+      pointer-events: auto !important;
+    }
+  `
+}
+
+function scheduleFloatingButtonReposition(): void {
+  if (floatingBtnReposScheduled) return
+  floatingBtnReposScheduled = true
+  requestAnimationFrame(() => {
+    floatingBtnReposScheduled = false
+    updateFloatingButtonPosition()
+  })
+}
+
+window.addEventListener("scroll", scheduleFloatingButtonReposition, { passive: true, capture: true })
+window.addEventListener("resize", scheduleFloatingButtonReposition, { passive: true })
+
 // ─── Iframe pierce ─────────────────────────────────────────────────────────
 // Gmail compose box lives inside a same-origin iframe. document.activeElement
 // in the top frame is the <iframe> element, not the contenteditable inside it.
@@ -1476,9 +1711,24 @@ function detectCurrentTone(): string {
 // ─── Focus tracking (for focus-drift fallback) ─────────────────────────────
 
 document.addEventListener("focusin", (e) => {
-  if (isTextElement(e.target as Element)) {
-    lastFocusedEl = e.target as HTMLElement
+  const target = e.target as Element | null
+  if (!isTextElement(target)) return
+  const el = target as HTMLElement
+  lastFocusedEl = el
+  if (shouldShowFloatingButton(el)) {
+    showFloatingButton(el, getIframeRectFor(el))
   }
+}, true)
+
+document.addEventListener("focusout", (e) => {
+  const target = e.target as Element | null
+  if (!floatingBtnHost || !floatingBtnAnchor) return
+  if (target !== floatingBtnAnchor) return
+  if (floatingBtnBlurTimer) clearTimeout(floatingBtnBlurTimer)
+  floatingBtnBlurTimer = setTimeout(() => {
+    floatingBtnBlurTimer = null
+    hideFloatingButton()
+  }, FLOATING_BTN_HIDE_DELAY_MS)
 }, true)
 
 document.addEventListener("input", (e) => {
@@ -1506,6 +1756,23 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 })
 
+// ─── Floating button preference (load + react to changes) ─────────────────
+
+chrome.storage.sync.get(["showFloatingButton"]).then(s => {
+  floatingBtnEnabled = s.showFloatingButton ?? true
+}).catch(() => {})
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "sync") return
+  if (!("showFloatingButton" in changes)) return
+  floatingBtnEnabled = changes.showFloatingButton.newValue ?? true
+  if (!floatingBtnEnabled) {
+    hideFloatingButton()
+  } else if (lastFocusedEl && document.activeElement === lastFocusedEl && shouldShowFloatingButton(lastFocusedEl)) {
+    showFloatingButton(lastFocusedEl, getIframeRectFor(lastFocusedEl))
+  }
+})
+
 // ─── Cleanup on unload ────────────────────────────────────────────────────
 
 window.addEventListener("beforeunload", () => {
@@ -1513,4 +1780,5 @@ window.addEventListener("beforeunload", () => {
   if (inlineDiffEl) removeInlineDiff(inlineDiffEl)
   removeOverlay()
   removeToast()
+  hideFloatingButton()
 })
