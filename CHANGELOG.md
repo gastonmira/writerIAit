@@ -2,6 +2,19 @@
 
 All notable changes to writerIAit are documented here.
 
+## [0.4.0] - 2026-04-25 — Floating Button + Chrome Web Store Compliance
+
+### Added
+- **Floating "W" button** — appears next to focused text fields and triggers the same correction flow as the keyboard shortcut. Toggleable from the popup (Preferences → Floating button). Resolves the Chrome Web Store "Red Potassium" rejection: the listing promised this affordance but only the shortcut existed.
+- **Privacy policy** — `landing/privacy.html` documents what the extension sends to the chosen LLM provider, what stays local, and contact info. Required for the Chrome Web Store Privacy tab ("Purple Nickel" rejection).
+
+### Fixed
+- **Rate limits show a clear message** — HTTP 429 from any provider now surfaces "Rate limit reached. Wait a minute, or switch provider from the popup." instead of the generic "API request failed". Error mapping consolidated in a pure `mapErrorToResponse` helper with unit coverage.
+- **Anthropic provider works again** — the service worker now sends the `anthropic-dangerous-direct-browser-access` header, which Anthropic requires for browser/MV3-origin requests. Previously a valid key returned 401.
+
+### Removed
+- **`scripting` permission** dropped from the manifest — was declared but never used. Resolves the Chrome Web Store "Purple Potassium" rejection.
+
 ## [0.3.1] - 2026-04-02 — Undo + Cache Reliability
 
 ### Fixed
