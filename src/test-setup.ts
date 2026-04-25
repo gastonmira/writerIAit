@@ -1,7 +1,8 @@
 import "@testing-library/jest-dom"
+import { vi } from "vitest"
 
 // ─── Chrome API mock ──────────────────────────────────────────────────────
-// Minimal stub that covers what the Popup component uses.
+// Minimal stub that covers what the Popup component and content script use.
 
 const localStore: Record<string, unknown> = {}
 const syncStore: Record<string, unknown> = {}
@@ -23,9 +24,22 @@ const makeStorage = (store: Record<string, unknown>) => ({
   storage: {
     local: makeStorage(localStore),
     sync: makeStorage(syncStore),
+    onChanged: { addListener: vi.fn(), removeListener: vi.fn() },
   },
   runtime: {
     getManifest: () => ({ version: "0.1.0" }),
+    onMessage: { addListener: vi.fn(), removeListener: vi.fn() },
+    sendMessage: vi.fn().mockResolvedValue({ corrections: [] }),
+  },
+  tabs: {
+    query: vi.fn().mockResolvedValue([]),
+    sendMessage: vi.fn().mockResolvedValue(undefined),
+  },
+  action: {
+    setIcon: vi.fn().mockResolvedValue(undefined),
+  },
+  commands: {
+    onCommand: { addListener: vi.fn(), removeListener: vi.fn() },
   },
 }
 

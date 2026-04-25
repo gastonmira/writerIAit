@@ -46,8 +46,7 @@
     },
     "permissions": [
       "storage",
-      "activeTab",
-      "scripting"
+      "activeTab"
     ],
     "default_locale": "en"
   },

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy — writerIAit</title>
+  <meta name="description" content="Privacy Policy for the writerIAit Chrome extension. What data the extension handles, what it does not collect, and which third parties receive your text.">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    a { color: inherit; }
+
+    :root {
+      --bg:              #ffffff;
+      --surface:         #f8fafc;
+      --border:          #e2e8f0;
+      --text-primary:    #0f172a;
+      --text-secondary:  #475569;
+      --muted:           #94a3b8;
+      --accent:          #2563eb;
+      --accent-hover:    #1d4ed8;
+      --radius-sm:       4px;
+      --radius-md:       8px;
+      --shadow:          0 4px 16px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08);
+      --font-ui:         'Inter', system-ui, -apple-system, sans-serif;
+      --content-max:     720px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:              #1e293b;
+        --surface:         #0f172a;
+        --border:          #334155;
+        --text-primary:    #f1f5f9;
+        --text-secondary:  #94a3b8;
+        --muted:           #64748b;
+        --accent:          #3b82f6;
+        --accent-hover:    #60a5fa;
+        --shadow:          0 4px 16px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3);
+      }
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-ui);
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text-primary);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    p, li { color: var(--text-secondary); }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .site-header-inner {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .logo {
+      width: 24px; height: 24px;
+      background: var(--accent);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-letter { color: #fff; font-size: 14px; font-weight: 600; line-height: 1; }
+    .brand-name { font-weight: 600; font-size: 15px; }
+
+    .back-link {
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+    }
+    .back-link:hover { color: var(--text-primary); background: var(--bg); }
+
+    main {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 3vw, 2.25rem);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .last-updated {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 36px 0 12px;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 8px;
+    }
+
+    p { margin-bottom: 14px; }
+
+    ul, ol { margin: 0 0 14px 22px; }
+    li { margin-bottom: 6px; }
+
+    code {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      font-size: 0.9em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1px 6px;
+      color: var(--text-primary);
+    }
+
+    a.inline {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    a.inline:hover { color: var(--accent-hover); }
+
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin: 20px 0 28px;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    footer {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="brand" href="index.html">
+        <span class="logo"><span class="logo-letter">W</span></span>
+        <span class="brand-name">writerIAit</span>
+      </a>
+      <a class="back-link" href="index.html">← Back to home</a>
+    </div>
+  </header>
+
+  <main>
+    <h1>Privacy Policy</h1>
+    <p class="last-updated">Last updated: April 25, 2026</p>
+
+    <div class="callout">
+      writerIAit is an open-source Chrome extension for grammar correction. The extension stores your settings on your device and forwards the text you ask to check to the LLM provider you select (OpenAI, Anthropic, Google, or Groq) using an API key you provide. It does not run servers of its own and does not share data with anyone else.
+    </div>
+
+    <h2>Who we are</h2>
+    <p>writerIAit is maintained by Gaston Mira. The full source code is published at <a class="inline" href="https://github.com/gastonmira/writeriait" target="_blank" rel="noopener noreferrer">github.com/gastonmira/writeriait</a>.</p>
+
+    <h2>What data the extension handles</h2>
+    <p>When you trigger a correction (using the keyboard shortcut <code>Ctrl+Shift+K</code> / <code>Cmd+Shift+K</code> or the floating button next to the focused text field), the extension reads the current contents of that field and sends it directly from your browser to the LLM provider you have configured.</p>
+
+    <h3>Data sent to the selected LLM provider</h3>
+    <ul>
+      <li>The text contained in the focused field at the time of the request.</li>
+      <li>The system prompt that asks the model to return grammar corrections, the language you selected, and the tone hint derived from the hostname (for example, "professional email" on Gmail).</li>
+      <li>Your API key, sent as the standard authentication header for that provider.</li>
+    </ul>
+
+    <h3>Data stored locally on your device</h3>
+    <p>Settings are saved in Chrome's extension storage. They never leave your device unless Chrome Sync is enabled by you for the relevant store:</p>
+    <ul>
+      <li><code>chrome.storage.local</code> — your API key, the count of corrections this week, and the reasons of recent corrections (used for the "Top fix" stat in the popup). Local storage is never synchronized across devices.</li>
+      <li><code>chrome.storage.sync</code> — non-sensitive preferences: native language, selected provider, check mode, rewrite intent, correction view, and whether the floating button is enabled.</li>
+    </ul>
+
+    <h2>What we do not collect</h2>
+    <ul>
+      <li>writerIAit does not run any backend server. There is no intermediate service between your browser and the LLM provider.</li>
+      <li>We do not collect analytics, telemetry, crash reports, or usage metrics.</li>
+      <li>We do not track your browsing history, IP address, location, or any identifier.</li>
+      <li>We do not sell, rent, or share data with third parties for advertising or any other purpose.</li>
+    </ul>
+
+    <h2>Third parties that receive your text</h2>
+    <p>The extension only ever talks to the LLM provider you choose. Each provider has its own privacy policy and data handling rules — please review them before deciding which to use:</p>
+    <ul>
+      <li>OpenAI — <a class="inline" href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer">openai.com/policies/privacy-policy</a></li>
+      <li>Anthropic — <a class="inline" href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer">anthropic.com/legal/privacy</a></li>
+      <li>Google (Gemini) — <a class="inline" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a></li>
+      <li>Groq — <a class="inline" href="https://groq.com/privacy-policy" target="_blank" rel="noopener noreferrer">groq.com/privacy-policy</a></li>
+    </ul>
+    <p>Switching providers from the extension popup changes which provider receives subsequent requests. The extension never sends your text to more than one provider per request.</p>
+
+    <h2>Permissions the extension requests</h2>
+    <ul>
+      <li><code>storage</code> — to save the preferences and API key listed above.</li>
+      <li><code>activeTab</code> — to deliver the keyboard shortcut to the active tab so the correction overlay can open on the field you are editing.</li>
+    </ul>
+    <p>The extension also declares a content script match of <code>&lt;all_urls&gt;</code> so the overlay and floating button can run on whatever site you are typing in. The script only reads field contents when you explicitly trigger a correction.</p>
+
+    <h2>How to delete your data</h2>
+    <ol>
+      <li>Open the extension popup and clear the API key field, then click Save.</li>
+      <li>Open <code>chrome://extensions</code>, find writerIAit, click "Details" → "Extension options" or remove the extension to wipe all stored preferences and stats.</li>
+      <li>To delete data already received by an LLM provider, follow the deletion instructions in that provider's privacy policy (linked above).</li>
+    </ol>
+
+    <h2>Children</h2>
+    <p>writerIAit is not directed to children under 13. Do not use the extension if you do not meet the minimum age required by the LLM provider you select.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>If this policy changes, the "Last updated" date at the top of this page will change. Material changes will also be noted in the project CHANGELOG on GitHub.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or requests can be sent via the project's issue tracker: <a class="inline" href="https://github.com/gastonmira/writeriait/issues" target="_blank" rel="noopener noreferrer">github.com/gastonmira/writeriait/issues</a>.</p>
+  </main>
+
+  <footer>
+    <span>© 2026 Gaston Mira</span>
+    <span><a class="inline" href="index.html">writerIAit home</a></span>
+  </footer>
+</body>
+</html>
