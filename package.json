@@ -5,9 +5,11 @@
   "description": "__MSG_ext_description__",
   "author": "gastonmira",
   "scripts": {
-    "predev": "mkdir -p build/chrome-mv3-dev && cp -r _locales build/chrome-mv3-dev/ && cp public/*.png build/chrome-mv3-dev/",
+    "predev": "node scripts/predev.js",
     "dev": "plasmo dev",
     "build": "plasmo build && cp -r _locales build/chrome-mv3-prod/ && cp public/*.png build/chrome-mv3-prod/",
+    "serve:landing": "npx http-server landing -p 3000 --cors -c-1",
+    "serve:canvas": "npx http-server landing/landings -p 3001 --cors",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

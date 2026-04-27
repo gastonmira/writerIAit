@@ -1,1076 +1,471 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script>
-    const SITE_URL = "https://example.com"
-    const PAGE_PATH = "/landing/"
-    const PAGE_URL = `${SITE_URL}${PAGE_PATH}`
-    const PAGE_TITLE = "writerIAit — Grammar correction that teaches you the rule"
-    const PAGE_DESCRIPTION =
-      "writerIAit — Chrome extension that corrects English grammar and explains why. For non-native speakers. Free, open source, bring your own API key."
-    const SOCIAL_DESCRIPTION =
-      "Built for Spanish and Portuguese speakers. Feels like a code review, not a spell checker. Open source, no subscription."
-    const SOCIAL_IMAGE_URL = `${SITE_URL}/landing/social-card.svg`
-    const SOCIAL_IMAGE_ALT =
-      "writerIAit social preview card with the tagline Grammar correction that teaches you the rule."
-
-    const escapeHtml = (value) =>
-      value
-        .replace(/&/g, "&amp;")
-        .replace(/"/g, "&quot;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-
-    const structuredData = {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: "writerIAit",
-      applicationCategory: "BrowserApplication",
-      operatingSystem: "Chrome / Chromium",
-      description: PAGE_DESCRIPTION,
-      url: PAGE_URL,
-      image: SOCIAL_IMAGE_URL,
-      isAccessibleForFree: true,
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "USD"
-      },
-      author: {
-        "@type": "Person",
-        name: "Gaston Mira"
-      }
-    }
-
-    const structuredDataJson = JSON.stringify(structuredData).replace(/</g, "\\u003c")
-
-    document.write(`
-      <title>${escapeHtml(PAGE_TITLE)}</title>
-      <meta name="description" content="${escapeHtml(PAGE_DESCRIPTION)}">
-      <meta name="robots" content="index,follow,max-image-preview:large">
-      <meta name="theme-color" content="#2563eb">
-      <link rel="canonical" href="${escapeHtml(PAGE_URL)}">
-      <meta property="og:type" content="website">
-      <meta property="og:site_name" content="writerIAit">
-      <meta property="og:title" content="${escapeHtml(PAGE_TITLE)}">
-      <meta property="og:description" content="${escapeHtml(SOCIAL_DESCRIPTION)}">
-      <meta property="og:url" content="${escapeHtml(PAGE_URL)}">
-      <meta property="og:image" content="${escapeHtml(SOCIAL_IMAGE_URL)}">
-      <meta property="og:image:alt" content="${escapeHtml(SOCIAL_IMAGE_ALT)}">
-      <meta property="og:image:width" content="1200">
-      <meta property="og:image:height" content="630">
-      <meta name="twitter:card" content="summary_large_image">
-      <meta name="twitter:title" content="${escapeHtml(PAGE_TITLE)}">
-      <meta name="twitter:description" content="${escapeHtml(SOCIAL_DESCRIPTION)}">
-      <meta name="twitter:image" content="${escapeHtml(SOCIAL_IMAGE_URL)}">
-      <meta name="twitter:image:alt" content="${escapeHtml(SOCIAL_IMAGE_ALT)}">
-      <script type="application/ld+json">${structuredDataJson}<\/script>
-    `)
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    /* ─── Reset ─────────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    img { display: block; max-width: 100%; }
-    button { font: inherit; cursor: pointer; }
-    a { color: inherit; }
-
-    /* ─── Design tokens — Light ──────────────────────────────────────── */
-    :root {
-      --bg:              #ffffff;
-      --surface:         #f8fafc;
-      --border:          #e2e8f0;
-      --text-primary:    #0f172a;
-      --text-secondary:  #475569;
-      --muted:           #94a3b8;
-      --accent:          #2563eb;
-      --accent-hover:    #1d4ed8;
-      --error:           #dc2626;
-      --success:         #16a34a;
-      --del-bg:          #fee2e2;
-      --del-text:        #991b1b;
-      --ins-bg:          #dcfce7;
-      --ins-text:        #166534;
-      --radius-sm:       4px;
-      --radius-md:       8px;
-      --radius-lg:       12px;
-      --shadow:          0 4px 16px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08);
-      --font-ui:         'Inter', system-ui, -apple-system, sans-serif;
-      --font-mono:       'JetBrains Mono', monospace;
-      --content-max:     720px;
-    }
-
-    /* ─── Design tokens — Dark ───────────────────────────────────────── */
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg:              #1e293b;
-        --surface:         #0f172a;
-        --border:          #334155;
-        --text-primary:    #f1f5f9;
-        --text-secondary:  #94a3b8;
-        --muted:           #64748b;
-        --accent:          #3b82f6;
-        --accent-hover:    #60a5fa;
-        --del-bg:          #450a0a;
-        --del-text:        #fca5a5;
-        --ins-bg:          #052e16;
-        --ins-text:        #86efac;
-        --shadow:          0 4px 16px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3);
-      }
-    }
-
-    /* ─── Base ───────────────────────────────────────────────────────── */
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-ui);
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text-primary);
-      background: var(--bg);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    p { color: var(--text-secondary); }
-
-    /* ─── Layout ─────────────────────────────────────────────────────── */
-    .container {
-      width: 100%;
-      max-width: var(--content-max);
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    .container-narrow {
-      max-width: 560px;
-    }
-
-    .container-wide {
-      max-width: 960px;
-    }
-
-    .section {
-      padding: 80px 0;
-    }
-
-    .section + .section {
-      border-top: 1px solid var(--border);
-    }
-
-    /* ─── Typography utilities ───────────────────────────────────────── */
-    .section-label {
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .section-headline {
-      font-size: clamp(1.5rem, 3vw, 2.25rem);
-      font-weight: 600;
-      line-height: 1.2;
-      color: var(--text-primary);
-      margin-bottom: 12px;
-    }
-
-    .story-headline {
-      font-size: clamp(1.875rem, 4vw, 2.5rem);
-      font-weight: 600;
-      line-height: 1.2;
-    }
-
-    .section-subhead {
-      font-size: 15px;
-      color: var(--text-secondary);
-      max-width: 520px;
-      margin-bottom: 40px;
-    }
-
-    /* ─── Buttons ────────────────────────────────────────────────────── */
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      min-height: 40px;
-      padding: 0 20px;
-      background: var(--accent);
-      color: #ffffff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: background 150ms ease;
-      white-space: nowrap;
-    }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    .btn-ghost {
-      display: inline-flex;
-      align-items: center;
-      min-height: 40px;
-      padding: 0 20px;
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: background 150ms ease;
-      white-space: nowrap;
-    }
-    .btn-ghost:hover { background: var(--surface); }
-    .btn-ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    .btn-disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-
-    .btn-sm { min-height: 32px; padding: 0 14px; font-size: 13px; }
-
-    /* ─── Badges ─────────────────────────────────────────────────────── */
-    .badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 500;
-      padding: 2px 7px;
-      border-radius: var(--radius-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .badge-free  { background: var(--ins-bg);  color: var(--ins-text); }
-    .badge-paid  { background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); }
-
-    /* ─── NAV HEADER ─────────────────────────────────────────────────── */
-    .site-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--surface);
-      transition: border-color 150ms ease;
-      border-bottom: 1px solid transparent;
-    }
-    .site-header.scrolled {
-      border-bottom-color: var(--border);
-    }
-
-    .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 56px;
-    }
-
-    .logo-link {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
-
-    .site-logo {
-      width: 24px;
-      height: 24px;
-      border-radius: var(--radius-sm);
-    }
-
-    .site-name {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .nav-links {
-      display: none;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .nav-link {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      text-decoration: none;
-      padding: 6px 10px;
-      border-radius: var(--radius-sm);
-      transition: color 120ms ease, background 120ms ease;
-    }
-
-    .nav-link:hover {
-      color: var(--text-primary);
-      background: var(--surface);
-    }
-
-    @media (min-width: 640px) {
-      .nav-links { display: flex; }
-    }
-
-    /* ─── HERO ───────────────────────────────────────────────────────── */
-    .hero-section {
-      padding: 96px 0 80px;
-      background: var(--surface);
-    }
-
-    .eyebrow {
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 20px;
-    }
-
-    .hero-headline {
-      font-size: clamp(2.25rem, 6vw, 4.25rem);
-      font-weight: 700;
-      line-height: 1.1;
-      color: var(--text-primary);
-      margin-bottom: 20px;
-      max-width: 640px;
-    }
-
-    .hero-subhead {
-      font-size: clamp(1rem, 2vw, 1.125rem);
-      color: var(--text-secondary);
-      max-width: 560px;
-      margin-bottom: 32px;
-      line-height: 1.65;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .hero-hint {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* ─── STORY ──────────────────────────────────────────────────────── */
-    .prose p {
-      font-size: 15px;
-      line-height: 1.75;
-      color: var(--text-secondary);
-      margin-top: 16px;
-    }
-    .prose p:first-child { margin-top: 0; }
-
-    /* ─── HOW IT WORKS ───────────────────────────────────────────────── */
-    .steps-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-      margin-top: 32px;
-    }
-
-    .step-number {
-      display: block;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--accent);
-      letter-spacing: 0.04em;
-      margin-bottom: 8px;
-    }
-
-    .step-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 6px;
-    }
-
-    .step-body {
-      font-size: 14px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-
-    kbd {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 1px 5px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-primary);
-    }
-
-    /* ─── LIVE EXAMPLE ───────────────────────────────────────────────── */
-    .browser-context {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      background: var(--surface);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 40px;
-    }
-
-    .context-label {
-      font-size: 10px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .fake-textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      font-family: var(--font-ui);
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text-secondary);
-      resize: none;
-      min-height: 72px;
-    }
-
-    .overlay-mock {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
-      padding: 12px 14px;
-      width: 100%;
-    }
-
-    .overlay-header {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .overlay-logo-mark {
-      width: 20px;
-      height: 20px;
-      background: var(--accent);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      color: #ffffff;
-      font-size: 11px;
-      font-weight: 600;
-      line-height: 1;
-    }
-
-    .overlay-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-      flex: 1;
-    }
-
-    .mode-badge {
-      font-size: 11px;
-      color: var(--text-secondary);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 2px 7px;
-    }
-
-    .btn-close-mock {
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      border-radius: var(--radius-sm);
-      font-size: 16px;
-      line-height: 1;
-      cursor: default;
-    }
-
-    /* Correction cards — mirrors overlay.ts exactly */
-    .correction-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      margin-bottom: 8px;
-    }
-    .correction-card:last-of-type { margin-bottom: 0; }
-
-    .diff-line {
-      display: flex;
-      align-items: baseline;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-bottom: 5px;
-    }
-
-    /* del-span / ins-span — exact mirror of overlay.ts SHADOW_CSS */
-    .del-span {
-      font-family: var(--font-mono);
-      font-size: 13px;
-      background: var(--del-bg);
-      color: var(--del-text);
-      text-decoration: line-through;
-      border-radius: var(--radius-sm);
-      padding: 2px 4px;
-    }
-
-    .ins-span {
-      font-family: var(--font-mono);
-      font-size: 13px;
-      background: var(--ins-bg);
-      color: var(--ins-text);
-      text-decoration: underline;
-      border-radius: var(--radius-sm);
-      padding: 2px 4px;
-    }
-
-    .diff-arrow {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .reason-text {
-      font-size: 11px;
-      font-style: italic;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .overlay-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-
-    .btn-overlay-primary {
-      min-height: 32px;
-      padding: 0 14px;
-      background: var(--accent);
-      color: #ffffff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: default;
-    }
-
-    .btn-overlay-ghost {
-      min-height: 32px;
-      padding: 0 14px;
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: default;
-    }
-
-    /* ─── PROVIDERS ──────────────────────────────────────────────────── */
-    .providers-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 32px;
-    }
-
-    .provider-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 16px;
-    }
-
-    .provider-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-
-    .provider-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .provider-model {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-secondary);
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .provider-note {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    /* ─── SCREENSHOTS ────────────────────────────────────────────────── */
-    .screenshots-grid {
-      display: flex;
-      flex-direction: row;
-      gap: 16px;
-      margin-top: 32px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      padding-bottom: 12px;
-    }
-
-    .screenshots-grid::-webkit-scrollbar {
-      display: none;
-    }
-
-    .screenshot-placeholder {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      flex: 0 0 85vw;
-      max-width: 340px;
-      scroll-snap-align: start;
-    }
-
-    .screenshot-placeholder:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 12px 32px rgba(0,0,0,0.10);
-    }
-
-    .screenshot-inner {
-      aspect-ratio: 16 / 10;
-      background: var(--surface);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .screenshot-inner-label {
-      font-size: 12px;
-      color: var(--muted);
-      font-family: var(--font-mono);
-    }
-
-    .screenshot-placeholder figcaption {
-      font-size: 14px;
-      color: var(--text-secondary);
-      padding: 12px 16px;
-      border-top: 1px solid var(--border);
-      background: var(--bg);
-    }
-
-    .screenshot-placeholder img {
-      width: 100%;
-      display: block;
-    }
-
-    /* ─── OPEN SOURCE CTA ────────────────────────────────────────────── */
-    .cta-body {
-      font-size: 15px;
-      color: var(--text-secondary);
-      line-height: 1.75;
-      margin-bottom: 28px;
-      margin-top: 16px;
-    }
-
-    .cta-actions {
-      margin-bottom: 20px;
-    }
-
-    .cta-footnote {
-      font-size: 11px;
-      color: var(--muted);
-      font-family: var(--font-mono);
-    }
-
-    /* ─── FOOTER ─────────────────────────────────────────────────────── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 24px 0;
-    }
-
-    .footer-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .footer-text {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .footer-link {
-      font-size: 12px;
-      color: var(--muted);
-      text-decoration: none;
-    }
-    .footer-link:hover { color: var(--text-secondary); }
-
-    /* ─── Responsive ─────────────────────────────────────────────────── */
-    @media (min-width: 640px) {
-      .browser-context {
-        padding: 32px;
-      }
-
-      .steps-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 32px;
-      }
-
-      .providers-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      .screenshots-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        overflow-x: visible;
-        scroll-snap-type: none;
-        padding-bottom: 0;
-      }
-
-      .screenshot-placeholder {
-        flex: unset;
-        max-width: unset;
-        scroll-snap-align: none;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      * { transition: none !important; animation: none !important; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>writerIAit — Grammar correction that teaches you the rule</title>
+<meta name="description" content="A free, open-source Chrome extension for non-native English speakers. Hit a shortcut, get a diff, learn the rule. Bring your own API key. No subscription. No backend.">
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  img, svg { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+
+  :root {
+    --blue-700: #1d4ed8; --blue-600: #2563eb; --blue-500: #3b82f6; --blue-400: #60a5fa; --blue-100: #bfdbfe; --blue-50: #eff6ff;
+    --slate-50: #f8fafc; --slate-100: #f1f5f9; --slate-200: #e2e8f0; --slate-300: #cbd5e1; --slate-400: #94a3b8;
+    --slate-500: #64748b; --slate-600: #475569; --slate-700: #334155; --slate-800: #1e293b; --slate-900: #0f172a;
+    --red-50: #fee2e2; --red-100: #fca5a5; --red-700: #991b1b; --red-900: #450a0a;
+    --green-50: #dcfce7; --green-100: #86efac; --green-700: #166534; --green-900: #052e16;
+    --bg: #ffffff; --border: var(--slate-200); --fg-1: var(--slate-900); --fg-2: var(--slate-600); --fg-muted: var(--slate-400);
+    --del-bg: var(--red-50); --del-fg: var(--red-700); --ins-bg: var(--green-50); --ins-fg: var(--green-700);
+    --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-display: 'Fraunces', Georgia, serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-ui); color: var(--fg-1); background: #ffffff; -webkit-font-smoothing: antialiased; line-height: 1.6; }
+
+  /* ─── NAV ─── */
+  .nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.7); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid transparent; transition: border-color 150ms; }
+  .nav.scrolled { border-bottom-color: var(--border); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 48px; max-width: 1280px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
+  .mark { width: 26px; height: 26px; border-radius: 5px; background: var(--blue-600); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 14px; }
+  .navlinks { display: flex; gap: 4px; }
+  .navlink { font-size: 13px; color: var(--fg-2); padding: 6px 12px; border-radius: 4px; transition: color 120ms, background 120ms; }
+  .navlink:hover { color: var(--fg-1); background: var(--slate-50); }
+  .nav-cta { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 7px 14px; border: 1px solid var(--border); border-radius: 4px; font-weight: 500; transition: background 120ms; }
+  .nav-cta:hover { background: var(--slate-50); }
+  @media (max-width: 760px) { .navlinks { display: none; } .nav-inner { padding: 14px 20px; } }
+
+  /* ─── HERO ─── */
+  .hero { padding: 120px 48px 88px; max-width: 1180px; margin: 0 auto; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; color: var(--blue-600); margin-bottom: 36px; letter-spacing: 0.02em; }
+  .h1 { font-family: var(--font-display); font-size: clamp(3rem, 7.5vw, 6rem); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; color: var(--slate-900); margin-bottom: 36px; max-width: 1040px; font-variation-settings: 'opsz' 144, 'SOFT' 50; }
+  .h1 em { font-style: italic; font-weight: 400; font-variation-settings: 'opsz' 144, 'SOFT' 100; color: var(--blue-600); }
+  .h1 .strike { background: var(--del-bg); color: var(--del-fg); text-decoration: line-through; padding: 0 8px; border-radius: 6px; font-family: var(--font-mono); font-size: 0.62em; vertical-align: 8px; font-weight: 500; }
+  .h1 .ins { background: var(--ins-bg); color: var(--ins-fg); text-decoration: underline; padding: 0 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.78em; vertical-align: 4px; }
+  .sub { font-size: 18px; color: var(--fg-2); max-width: 620px; line-height: 1.6; margin-bottom: 36px; }
+  .sub strong { color: var(--slate-900); font-weight: 500; }
+  .cta-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .cta-primary { background: var(--blue-600); color: #fff; padding: 12px 22px; border-radius: 4px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: background 120ms; }
+  .cta-primary:hover { background: var(--blue-700); }
+  .cta-ghost { padding: 12px 22px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; color: var(--fg-1); display: inline-flex; align-items: center; gap: 8px; font-weight: 500; transition: background 120ms; }
+  .cta-ghost:hover { background: var(--slate-50); }
+  .cta-soon { color: var(--fg-muted); font-size: 12px; }
+  .hint { font-size: 12px; color: var(--fg-muted); margin-top: 20px; font-family: var(--font-mono); }
+  @media (max-width: 760px) { .hero { padding: 64px 20px 48px; } }
+
+  /* ─── EXPLAIN (3-up) ─── */
+  .explain { max-width: 1180px; margin: 0 auto; padding: 48px 48px 96px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card { padding: 28px; border: 1px solid var(--border); border-radius: 8px; background: #fff; transition: border-color 150ms; }
+  .card:hover { border-color: var(--slate-300); }
+  .card-num { font-family: var(--font-mono); font-size: 12px; color: var(--blue-600); margin-bottom: 16px; }
+  .card-h { font-size: 17px; font-weight: 600; color: var(--slate-900); margin-bottom: 8px; }
+  .card-p { font-size: 14px; line-height: 1.6; color: var(--fg-2); }
+  kbd { font-family: var(--font-mono); font-size: 11px; background: var(--slate-50); border: 1px solid var(--border); border-bottom-width: 2px; padding: 1px 5px; border-radius: 3px; color: var(--slate-900); }
+  @media (max-width: 760px) { .explain { grid-template-columns: 1fr; padding: 24px 20px 64px; } }
+
+  /* ─── DEMO ─── */
+  .demo { max-width: 1180px; margin: 0 auto; padding: 0 48px 96px; }
+  .demo-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: 32px; gap: 24px; flex-wrap: wrap; }
+  .demo-h2 { font-family: var(--font-display); font-size: clamp(1.75rem, 3.2vw, 2.25rem); font-weight: 500; color: var(--slate-900); letter-spacing: -0.01em; max-width: 640px; line-height: 1.2; font-variation-settings: 'opsz' 96; }
+  .demo-sub { font-size: 14px; color: var(--fg-2); max-width: 320px; }
+  .demo-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04); }
+  .demo-left { padding: 28px; border-right: 1px solid var(--border); background: var(--slate-50); }
+  .demo-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: 14px; font-weight: 500; }
+  .demo-text { font-size: 15px; line-height: 1.75; color: var(--slate-700); }
+  .demo-text .err { background: #fee2e2; border-radius: 3px; padding: 1px 4px; }
+  .demo-right { padding: 22px; background: var(--slate-900); color: #f1f5f9; }
+  .demo-overlay-head { display: flex; align-items: center; gap: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--slate-700); }
+  .demo-overlay-head .ttl { font-size: 13px; font-weight: 600; flex: 1; }
+  .demo-overlay-head .badge { font-size: 11px; background: var(--slate-700); color: var(--slate-300); padding: 3px 8px; border-radius: 4px; }
+  .corr { background: var(--slate-800); border: 1px solid var(--slate-700); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .corr:last-child { margin-bottom: 0; }
+  .diff { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; font-family: var(--font-mono); font-size: 13px; }
+  .del { background: var(--red-900); color: var(--red-100); text-decoration: line-through; padding: 2px 6px; border-radius: 4px; }
+  .ins { background: var(--green-900); color: var(--green-100); text-decoration: underline; padding: 2px 6px; border-radius: 4px; }
+  .arr { color: var(--slate-500); }
+  .reason { font-size: 12px; font-style: italic; color: var(--slate-400); line-height: 1.5; }
+  @media (max-width: 760px) { .demo { padding: 0 20px 64px; } .demo-grid { grid-template-columns: 1fr; } .demo-left { border-right: 0; border-bottom: 1px solid var(--border); } }
+
+  /* ─── OPEN SOURCE MANIFESTO ─── */
+  .os { background: var(--slate-900); color: #f1f5f9; padding: 96px 48px; }
+  .os-inner { max-width: 1080px; margin: 0 auto; }
+  .os-eyebrow { font-family: var(--font-mono); font-size: 12px; color: var(--blue-400); margin-bottom: 24px; }
+  .os-h2 { font-family: var(--font-display); font-size: clamp(2rem, 4.4vw, 3.25rem); font-weight: 500; line-height: 1.1; letter-spacing: -0.015em; margin-bottom: 32px; max-width: 880px; font-variation-settings: 'opsz' 144; }
+  .os-h2 em { font-style: normal; color: var(--blue-400); }
+  .os-p { font-size: 17px; line-height: 1.75; color: var(--slate-300); margin-bottom: 16px; max-width: 720px; }
+  .os-p strong { color: #fff; font-weight: 500; }
+  .os-grid { margin-top: 48px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .os-card { padding: 24px; border: 1px solid var(--slate-700); border-radius: 8px; background: var(--slate-800); transition: border-color 150ms, transform 150ms; }
+  .os-card:hover { border-color: var(--slate-600); transform: translateY(-1px); }
+  .os-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #fff; display: flex; align-items: center; gap: 10px; }
+  .os-card .gh-mark { font-family: var(--font-mono); font-size: 11px; color: var(--blue-400); background: rgba(96,165,250,0.12); padding: 2px 7px; border-radius: 3px; font-weight: 400; }
+  .os-card p { font-size: 14px; color: var(--slate-400); line-height: 1.6; }
+  .os-card p strong { color: var(--slate-200); font-weight: 500; }
+  .os-cta { margin-top: 48px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .os-cta .primary { background: #fff; color: var(--slate-900); padding: 12px 22px; border-radius: 4px; font-weight: 500; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; transition: background 120ms; }
+  .os-cta .primary:hover { background: var(--slate-100); }
+  .os-cta .ghost { padding: 12px 22px; border: 1px solid var(--slate-700); color: var(--slate-200); border-radius: 4px; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; transition: background 120ms; }
+  .os-cta .ghost:hover { background: var(--slate-800); }
+  @media (max-width: 760px) { .os { padding: 64px 20px; } .os-grid { grid-template-columns: 1fr; } }
+
+  /* ─── PROVIDERS ─── */
+  .provs { max-width: 1180px; margin: 0 auto; padding: 96px 48px; }
+  .provs-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); text-align: center; margin-bottom: 32px; font-weight: 500; }
+  .provs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .provs-cell { border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; transition: border-color 150ms; }
+  .provs-cell:hover { border-color: var(--slate-300); }
+  .provs-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .provs-name { font-size: 14px; font-weight: 600; color: var(--slate-900); }
+  .provs-tag { font-size: 11px; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
+  .provs-tag.free { background: var(--ins-bg); color: var(--ins-fg); }
+  .provs-tag.paid { background: var(--slate-50); color: var(--fg-2); border: 1px solid var(--border); }
+  .provs-model { font-family: var(--font-mono); font-size: 11px; color: var(--fg-2); display: block; margin-bottom: 6px; }
+  .provs-note { font-size: 12px; color: var(--fg-muted); line-height: 1.5; }
+  @media (max-width: 760px) { .provs { padding: 64px 20px; } .provs-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ─── FOOTER ─── */
+  .foot { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--fg-muted); font-family: var(--font-mono); max-width: 1280px; margin: 0 auto; }
+  .foot a:hover { color: var(--fg-2); }
+  .foot-links { display: inline-flex; gap: 10px; align-items: center; }
+  .foot-sep { color: var(--slate-300); }
+  @media (max-width: 760px) { .foot { padding: 20px; } }
+
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+  /* ─── HERO ANIMATION ─── */
+  .hero-anim { position: relative; }
+
+  .hero-word { transition: background 350ms ease, color 350ms ease; }
+  .hero-word.corrected {
+    background: var(--del-bg); color: var(--del-fg); text-decoration: line-through;
+    padding: 0 8px; border-radius: 6px; font-family: var(--font-mono);
+    font-size: 0.62em; vertical-align: 8px; font-weight: 500;
+  }
+  .hero-word.typing::after {
+    content: '';
+    display: inline-block;
+    width: 0.04em; height: 0.78em;
+    background: var(--blue-600);
+    vertical-align: -0.06em;
+    margin-left: 0.04em;
+    animation: hero-caret 0.65s steps(2) infinite;
+  }
+  @keyframes hero-caret { to { opacity: 0; } }
+
+  .hero-teaches { opacity: 0; transition: opacity 400ms ease; }
+  .hero-teaches.visible { opacity: 1; }
+
+  .hero-ov {
+    position: absolute; top: calc(100% + 12px); left: 0;
+    width: 300px; max-width: calc(100vw - 40px);
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    padding: 12px 16px;
+    opacity: 0; transform: translateY(-6px);
+    transition: opacity 200ms ease, transform 200ms ease;
+    pointer-events: none; z-index: 20;
+  }
+  .hero-ov.visible { opacity: 1; transform: translateY(0); }
+
+  .hero-ov-head {
+    display: flex; align-items: center; gap: 8px;
+    padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--border);
+  }
+  .hero-ov-logo {
+    width: 20px; height: 20px; background: var(--blue-600); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 11px; font-weight: 600; flex-shrink: 0;
+  }
+  .hero-ov-title { font-size: 13px; font-weight: 600; color: var(--slate-900); flex: 1; }
+  .hero-ov-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border); border-top-color: var(--blue-600);
+    border-radius: 50%; animation: hero-spin 0.7s linear infinite;
+    flex-shrink: 0; transition: opacity 150ms;
+  }
+  .hero-ov-spinner.hidden { opacity: 0; }
+  @keyframes hero-spin { to { transform: rotate(360deg); } }
+
+  .hero-ov-card {
+    background: var(--slate-50); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px;
+    opacity: 0; transition: opacity 250ms ease;
+  }
+  .hero-ov-card.visible { opacity: 1; }
+  .hero-ov-diff {
+    display: flex; gap: 8px; align-items: baseline;
+    margin-bottom: 7px; font-family: var(--font-mono); font-size: 13px;
+  }
+  .hero-ov-del { background: var(--del-bg); color: var(--del-fg); text-decoration: line-through; padding: 2px 5px; border-radius: 4px; }
+  .hero-ov-arr { color: var(--slate-400); }
+  .hero-ov-ins { background: var(--ins-bg); color: var(--ins-fg); text-decoration: underline; padding: 2px 5px; border-radius: 4px; }
+  .hero-ov-reason { font-size: 12px; font-style: italic; color: var(--fg-2); line-height: 1.5; }
+
+  /* ─── SCROLL REVEAL ─── */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 550ms ease, transform 550ms ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  .reveal-item { opacity: 0; transform: translateY(14px); transition: opacity 500ms ease, transform 500ms ease; }
+  .reveal-stagger.in .reveal-item { opacity: 1; transform: translateY(0); transition-delay: var(--rd, 0ms); }
+</style>
 </head>
 <body>
 
-  <!-- ─── NAV HEADER ─────────────────────────────────────────────────── -->
-  <header class="site-header" id="site-header">
-    <div class="container header-inner">
-      <a href="#hero" class="logo-link">
-        <img src="../public/icon256-active.png" alt="writerIAit logo" class="site-logo">
-        <span class="site-name">writerIAit</span>
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#top" class="brand">
+        <span class="mark">W</span>
+        <span>writerIAit</span>
       </a>
-      <nav class="nav-links">
-        <a href="#how-it-works" class="nav-link">How it works</a>
-        <a href="#providers" class="nav-link">Providers</a>
-        <a href="#screenshots" class="nav-link">Screenshots</a>
-        <a href="#open-source" class="nav-link">Open source</a>
+      <nav class="navlinks">
+        <a class="navlink" href="#how">How it works</a>
+        <a class="navlink" href="#open">Open source</a>
+        <a class="navlink" href="#providers">Providers</a>
       </nav>
-      <a href="https://github.com/gastonmira/writerIAit" class="btn-ghost btn-sm" target="_blank" rel="noopener noreferrer">
-        GitHub
+      <a class="nav-cta" href="https://github.com/gastonmira/writerIAit" target="_blank" rel="noopener noreferrer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.06c-3.34.73-4.04-1.6-4.04-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.39 1.24-3.23-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.24 1.92 1.24 3.23 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .5z"/></svg>
+        Star on GitHub
       </a>
     </div>
   </header>
 
-  <main>
+  <main id="top">
 
-    <!-- ─── HERO ─────────────────────────────────────────────────────── -->
-    <section id="hero" class="hero-section">
-      <div class="container">
-        <p class="eyebrow">Open source &middot; Bring your own API key &middot; No subscription</p>
-        <h1 class="hero-headline">Grammar correction that<br>teaches you the rule.</h1>
-        <p class="hero-subhead">
-          For non-native English speakers who write every day — emails, docs, messages,
-          pull requests, whatever. Feels like a code review, not a spell checker.
-        </p>
-        <div class="hero-actions">
-          <a href="https://github.com/gastonmira/writerIAit" class="btn-primary" target="_blank" rel="noopener noreferrer">
-            View on GitHub
+    <section class="hero">
+      <p class="eyebrow">// open source · bring your own api key · no subscription</p>
+      <div class="hero-anim">
+        <h1 class="h1">The grammar tool that<br>actually <span id="hero-word" class="hero-word typing"></span><em id="hero-teaches" class="hero-teaches"> teaches.</em></h1>
+        <div id="hero-ov" class="hero-ov" aria-hidden="true">
+          <div class="hero-ov-head">
+            <div class="hero-ov-logo">W</div>
+            <span class="hero-ov-title">writerIAit</span>
+            <div id="hero-ov-spinner" class="hero-ov-spinner"></div>
+          </div>
+          <div id="hero-ov-card" class="hero-ov-card">
+            <div class="hero-ov-diff">
+              <span class="hero-ov-del">corrects</span>
+              <span class="hero-ov-arr">→</span>
+              <span class="hero-ov-ins">teaches</span>
+            </div>
+            <p class="hero-ov-reason">The extension doesn't just fix errors — it explains the rule. "teaches" is the honest word.</p>
+          </div>
+        </div>
+      </div>
+      <p class="sub">A small, free Chrome extension for non-native English speakers. It reads your text, shows you what to fix, and explains <strong>why</strong> — like a colleague leaving comments on a pull request.</p>
+      <div class="cta-row">
+        <a class="cta-primary" href="https://github.com/gastonmira/writerIAit" target="_blank" rel="noopener noreferrer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.06c-3.34.73-4.04-1.6-4.04-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.39 1.24-3.23-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.24 1.92 1.24 3.23 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .5z"/></svg>
+          View on GitHub
+        </a>
+        <a class="cta-ghost" href="#">Add to Chrome <span class="cta-soon">· soon</span></a>
+      </div>
+      <p class="hint">$ npm install nothing · sign up nowhere · use today</p>
+    </section>
+
+    <section class="explain reveal-stagger" id="how">
+      <div class="card reveal-item" style="--rd:0ms">
+        <div class="card-num">01 · Type</div>
+        <h3 class="card-h">Write where you already write.</h3>
+        <p class="card-p">Gmail, Slack, GitHub, Notion, your CMS, that one ancient internal tool — anywhere there's a text field.</p>
+      </div>
+      <div class="card reveal-item" style="--rd:90ms">
+        <div class="card-num">02 · Trigger</div>
+        <h3 class="card-h">Hit one shortcut.</h3>
+        <p class="card-p"><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>K</kbd> on Mac, <kbd>Ctrl</kbd> <kbd>⇧</kbd> <kbd>K</kbd> on Windows. Nothing runs until you ask.</p>
+      </div>
+      <div class="card reveal-item" style="--rd:180ms">
+        <div class="card-num">03 · Learn</div>
+        <h3 class="card-h">Read the diff. Read the rule.</h3>
+        <p class="card-p">Each correction comes with a one-sentence explanation. Accept, skip, or argue with it.</p>
+      </div>
+    </section>
+
+    <section class="demo reveal">
+      <div class="demo-head">
+        <h2 class="demo-h2">Every fix comes with a reason — that's the whole point.</h2>
+        <p class="demo-sub">Other tools tell you what's wrong. writerIAit tells you why, in plain language, in one line.</p>
+      </div>
+      <div class="demo-grid">
+        <div class="demo-left">
+          <p class="demo-label">Your text · in Gmail</p>
+          <p class="demo-text">Hi Sarah, I wanted to follow up in the email I <span class="err">sended</span> last week about the proposal. Please let me know if you have any <span class="err">question</span>. I am available <span class="err">for discuss</span> anytime this week.</p>
+        </div>
+        <div class="demo-right">
+          <div class="demo-overlay-head">
+            <div style="width:22px;height:22px;background:var(--blue-500);border-radius:4px;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:600;">W</div>
+            <span class="ttl">Correction</span>
+            <span class="badge">Teaching</span>
+          </div>
+          <div class="corr">
+            <div class="diff"><span class="del">sended</span><span class="arr">→</span><span class="ins">sent</span></div>
+            <p class="reason">"Send" is irregular. Past tense is "sent", not "sended".</p>
+          </div>
+          <div class="corr">
+            <div class="diff"><span class="del">any question</span><span class="arr">→</span><span class="ins">any questions</span></div>
+            <p class="reason">After "any" in questions and negatives, use the plural.</p>
+          </div>
+          <div class="corr">
+            <div class="diff"><span class="del">for discuss</span><span class="arr">→</span><span class="ins">to discuss</span></div>
+            <p class="reason">"Available" takes a to-infinitive — common ES/PT transfer error.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="os reveal" id="open">
+      <div class="os-inner">
+        <p class="os-eyebrow">// open source</p>
+        <h2 class="os-h2">It's <em>everybody's</em> tool.</h2>
+        <p class="os-p">writerIAit is <strong>MIT licensed</strong> and lives entirely on GitHub. There's no company behind it, no roadmap behind a paywall, no analytics watching you type. The repo is the product.</p>
+        <p class="os-p">If something's broken, open an issue. If you want it to do something it doesn't, open a pull request. If you wish the explanations were in your language, fork it and translate them — the whole point is that anyone writing in their second language can shape the tool that helps them learn.</p>
+
+        <div class="os-grid">
+          <div class="os-card">
+            <h3><span class="gh-mark">#1</span> Use it freely</h3>
+            <p>Personal projects, work, side projects, in a classroom, in a startup — wherever. <strong>No license fee, no attribution required, no quotas.</strong></p>
+          </div>
+          <div class="os-card">
+            <h3><span class="gh-mark">PR</span> Change anything</h3>
+            <p>Don't like a UI choice? Want a new provider? Disagree with how a rule is explained? <strong>Open a pull request.</strong> The community owns the direction.</p>
+          </div>
+          <div class="os-card">
+            <h3><span class="gh-mark">fork</span> Or fork it</h3>
+            <p>Spin up your own version with your own rules, your own provider list, your own brand. <strong>The MIT license is short for a reason.</strong></p>
+          </div>
+          <div class="os-card">
+            <h3><span class="gh-mark">∅</span> Trust nothing</h3>
+            <p>No backend exists. Your text goes from your browser straight to the LLM you picked. <strong>Read the source code yourself</strong> — that's the only audit that matters.</p>
+          </div>
+        </div>
+
+        <div class="os-cta">
+          <a class="primary" href="https://github.com/gastonmira/writerIAit" target="_blank" rel="noopener noreferrer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.06c-3.34.73-4.04-1.6-4.04-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.39 1.24-3.23-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.24 1.92 1.24 3.23 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .5z"/></svg>
+            Open the repo
           </a>
-          <span class="btn-ghost btn-disabled">
-            Add to Chrome (coming soon)
-          </span>
-        </div>
-        <p class="hero-hint">Gemini and Groq are free — no credit card needed to get started.</p>
-      </div>
-    </section>
-
-    <!-- ─── STORY ─────────────────────────────────────────────────────── -->
-    <section id="story" class="section">
-      <div class="container container-narrow">
-        <p class="section-label">Why it exists</p>
-        <h2 class="section-headline story-headline">Other tools told me what was wrong.<br>None of them told me why.</h2>
-        <div class="prose">
-          <p>
-            I use English every day — emails, Slack, pull requests, Notion docs, you name it.
-            And for years I kept making the same mistakes. Grammar tools would silently fix them,
-            and I'd make them again the next day. I wasn't learning anything.
-          </p>
-          <p>
-            I wanted something that worked like a colleague doing a code review:
-            here's what's wrong, here's why it's wrong, and here's how to write it correctly.
-            That's what Teaching Mode is.
-          </p>
-          <p>
-            writerIAit has no backend — your text goes directly from your browser to whichever
-            AI provider you choose. Nothing is stored or logged by writerIAit.
-          </p>
-          <p>
-            So I built it. And then I made it open source, because anyone writing in their
-            second language deserves a tool like this.
-          </p>
+          <a class="ghost" href="https://github.com/gastonmira/writerIAit/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Read CONTRIBUTING.md →</a>
+          <a class="ghost" href="https://github.com/gastonmira/writerIAit/issues" target="_blank" rel="noopener noreferrer">Open an issue →</a>
         </div>
       </div>
     </section>
 
-    <!-- ─── HOW IT WORKS ──────────────────────────────────────────────── -->
-    <section id="how-it-works" class="section">
-      <div class="container">
-        <p class="section-label">How it works</p>
-        <div class="steps-grid">
-          <div class="step">
-            <span class="step-number">01</span>
-            <h3 class="step-title">Type normally</h3>
-            <p class="step-body">Write in any text field — Gmail, Slack, GitHub, Notion, or any website.</p>
-          </div>
-          <div class="step">
-            <span class="step-number">02</span>
-            <h3 class="step-title">Trigger the check</h3>
-            <p class="step-body">
-              Press <kbd>Cmd</kbd>&thinsp;+&thinsp;<kbd>Shift</kbd>&thinsp;+&thinsp;<kbd>K</kbd> on Mac
-              or <kbd>Ctrl</kbd>&thinsp;+&thinsp;<kbd>Shift</kbd>&thinsp;+&thinsp;<kbd>K</kbd> on Windows.
-            </p>
-          </div>
-          <div class="step">
-            <span class="step-number">03</span>
-            <h3 class="step-title">Review the diff</h3>
-            <p class="step-body">Accept or skip each correction. Every change includes a plain-language reason.</p>
-          </div>
+    <section class="provs reveal-stagger" id="providers">
+      <p class="provs-head">Bring your own key · two free tiers, two paid</p>
+      <div class="provs-grid">
+        <div class="provs-cell reveal-item" style="--rd:0ms">
+          <div class="provs-row"><span class="provs-name">Gemini</span><span class="provs-tag free">Free</span></div>
+          <code class="provs-model">gemini-2.0-flash-lite</code>
+          <p class="provs-note">Google AI Studio key. Generous free limits.</p>
         </div>
-      </div>
-    </section>
-
-    <!-- ─── LIVE EXAMPLE ──────────────────────────────────────────────── -->
-    <section id="live-example" class="section">
-      <div class="container">
-        <p class="section-label">Live example</p>
-        <h2 class="section-headline">Exactly what you see in the extension</h2>
-        <p class="section-subhead">
-          Teaching Mode is always on. Every correction comes with a reason — not just a fix.
-        </p>
-
-        <div class="browser-context" role="region" aria-label="Extension overlay demonstration">
-
-          <!-- Left: fake textarea -->
-          <div class="browser-context-left">
-            <p class="context-label">Your text</p>
-            <div class="fake-textarea" aria-label="Original text before correction">
-              Hi Sarah, I wanted to follow up in the email I sended last week about the proposal.
-              Please let me know if you have any question.
-              I am available for discuss anytime this week.
-            </div>
-          </div>
-
-          <!-- Right: overlay mock -->
-          <div class="overlay-mock" role="complementary" aria-label="writerIAit correction overlay">
-
-            <div class="overlay-header">
-              <div class="overlay-logo-mark" aria-hidden="true">W</div>
-              <span class="overlay-title">writerIAit</span>
-              <span class="mode-badge">Correct</span>
-              <div class="btn-close-mock" aria-hidden="true">&times;</div>
-            </div>
-
-            <!-- Correction 1 -->
-            <div class="correction-card">
-              <div class="diff-line">
-                <span class="del-span">sended</span>
-                <span class="diff-arrow" aria-hidden="true">→</span>
-                <span class="ins-span">sent</span>
-              </div>
-              <p class="reason-text">
-                "Send" is an irregular verb. Its simple past form is "sent", not "sended".
-              </p>
-            </div>
-
-            <!-- Correction 2 -->
-            <div class="correction-card">
-              <div class="diff-line">
-                <span class="del-span">any question</span>
-                <span class="diff-arrow" aria-hidden="true">→</span>
-                <span class="ins-span">any questions</span>
-              </div>
-              <p class="reason-text">
-                After "any" in questions and negatives, English uses the plural form.
-              </p>
-            </div>
-
-            <!-- Correction 3 -->
-            <div class="correction-card">
-              <div class="diff-line">
-                <span class="del-span">for discuss</span>
-                <span class="diff-arrow" aria-hidden="true">→</span>
-                <span class="ins-span">to discuss</span>
-              </div>
-              <p class="reason-text">
-                "Available" takes a to-infinitive, not a preposition + bare verb.
-                Common Spanish/Portuguese transfer error.
-              </p>
-            </div>
-
-            <div class="overlay-actions">
-              <button class="btn-overlay-primary" tabindex="-1">Accept all</button>
-              <button class="btn-overlay-ghost" tabindex="-1">Dismiss</button>
-            </div>
-
-          </div>
+        <div class="provs-cell reveal-item" style="--rd:80ms">
+          <div class="provs-row"><span class="provs-name">Groq</span><span class="provs-tag free">Free</span></div>
+          <code class="provs-model">llama-3.1-8b-instant</code>
+          <p class="provs-note">Free tier, near-instant inference.</p>
         </div>
-      </div>
-    </section>
-
-    <!-- ─── PROVIDERS ─────────────────────────────────────────────────── -->
-    <section id="providers" class="section">
-      <div class="container">
-        <p class="section-label">LLM providers</p>
-        <h2 class="section-headline">Start free. No credit card.</h2>
-        <p class="section-subhead">
-          Your API key is stored locally and never leaves your device.
-        </p>
-        <div class="providers-grid">
-          <div class="provider-card">
-            <div class="provider-header">
-              <span class="provider-name">Gemini</span>
-              <span class="badge badge-free">Free</span>
-            </div>
-            <code class="provider-model">gemini-2.0-flash-lite</code>
-            <p class="provider-note">Google AI Studio — free API key, generous limits.</p>
-          </div>
-          <div class="provider-card">
-            <div class="provider-header">
-              <span class="provider-name">Groq</span>
-              <span class="badge badge-free">Free</span>
-            </div>
-            <code class="provider-model">llama-3.1-8b-instant</code>
-            <p class="provider-note">Groq console — free tier, extremely fast inference.</p>
-          </div>
-          <div class="provider-card">
-            <div class="provider-header">
-              <span class="provider-name">OpenAI</span>
-              <span class="badge badge-paid">Paid</span>
-            </div>
-            <code class="provider-model">gpt-4o-mini</code>
-            <p class="provider-note">Higher correction quality. Fractions of a cent per check.</p>
-          </div>
-          <div class="provider-card">
-            <div class="provider-header">
-              <span class="provider-name">Anthropic</span>
-              <span class="badge badge-paid">Paid</span>
-            </div>
-            <code class="provider-model">claude-haiku-4-5</code>
-            <p class="provider-note">Best reasoning on complex grammar. Very cost-efficient.</p>
-          </div>
+        <div class="provs-cell reveal-item" style="--rd:160ms">
+          <div class="provs-row"><span class="provs-name">OpenAI</span><span class="provs-tag paid">Paid</span></div>
+          <code class="provs-model">gpt-4o-mini</code>
+          <p class="provs-note">Higher quality. Fractions of a cent per check.</p>
         </div>
-      </div>
-    </section>
-
-    <!-- ─── SCREENSHOTS ───────────────────────────────────────────────── -->
-    <section id="screenshots" class="section">
-      <div class="container container-wide">
-        <p class="section-label">Screenshots</p>
-        <h2 class="section-headline">See it in action</h2>
-        <div class="screenshots-grid">
-          <figure class="screenshot-placeholder">
-            <img src="screenshots/screenshot_01_gmail_inline.png" alt="writerIAit correction overlay on Gmail compose" loading="lazy">
-            <figcaption>Correction overlay on Gmail compose</figcaption>
-          </figure>
-          <figure class="screenshot-placeholder">
-            <img src="screenshots/screenshot_03_gmail_correction2.png" alt="Teaching Mode showing the reason for each correction" loading="lazy">
-            <figcaption>Teaching Mode: every correction explains the rule</figcaption>
-          </figure>
-          <figure class="screenshot-placeholder">
-            <img src="screenshots/screenshot_04_github_correction.png" alt="writerIAit correction overlay on a GitHub comment" loading="lazy">
-            <figcaption>Works on GitHub, Slack, Notion, and more</figcaption>
-          </figure>
-          <figure class="screenshot-placeholder">
-            <img src="screenshots/screenshot_05_popup_settings.png" alt="writerIAit settings popup showing provider and language selection" loading="lazy">
-            <figcaption>Settings: choose your AI provider and language</figcaption>
-          </figure>
+        <div class="provs-cell reveal-item" style="--rd:240ms">
+          <div class="provs-row"><span class="provs-name">Anthropic</span><span class="provs-tag paid">Paid</span></div>
+          <code class="provs-model">claude-haiku-4-5</code>
+          <p class="provs-note">Best on tricky grammar. Cost-efficient.</p>
         </div>
-      </div>
-    </section>
-
-    <!-- ─── OPEN SOURCE CTA ───────────────────────────────────────────── -->
-    <section id="open-source" class="section">
-      <div class="container container-narrow">
-        <p class="section-label">Open source</p>
-        <h2 class="section-headline">Built in public.<br>MIT license.</h2>
-        <p class="cta-body">
-          Star it, fork it, contribute to it. Issues and pull requests are welcome.
-          No tracking, no analytics, no server ever sees your text.
-        </p>
-        <div class="cta-actions">
-          <a href="https://github.com/gastonmira/writerIAit" class="btn-primary" target="_blank" rel="noopener noreferrer">
-            View on GitHub
-          </a>
-        </div>
-        <p class="cta-footnote">MIT license &nbsp;&middot;&nbsp; No telemetry &nbsp;&middot;&nbsp; Your API key, your data</p>
       </div>
     </section>
 
   </main>
 
-  <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
-  <footer>
-    <div class="container footer-inner">
-      <span class="footer-text">MIT License &middot; Made by Gastón Mira</span>
-      <a href="https://github.com/gastonmira/writerIAit" class="footer-link" target="_blank" rel="noopener noreferrer">
-        github.com/gastonmira/writerIAit
-      </a>
-    </div>
+  <footer class="foot">
+    <span>// MIT · made by <a href="https://gastonmira.dev/" target="_blank" rel="noopener noreferrer">Gaston Mira</a></span>
+    <span class="foot-links">
+      <a href="Privacy.html">privacy</a>
+      <span class="foot-sep">·</span>
+      <a href="https://github.com/gastonmira/writerIAit" target="_blank" rel="noopener noreferrer">github.com/gastonmira/writerIAit</a>
+    </span>
   </footer>
 
   <script>
-    // Sticky header border on scroll
-    const header = document.getElementById('site-header')
+    const nav = document.getElementById('nav');
     window.addEventListener('scroll', () => {
-      header.classList.toggle('scrolled', window.scrollY > 8)
-    }, { passive: true })
+      nav.classList.toggle('scrolled', window.scrollY > 8);
+    }, { passive: true });
 
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(link => {
-      link.addEventListener('click', e => {
-        const target = document.querySelector(link.getAttribute('href'))
-        if (target) {
-          e.preventDefault()
-          target.scrollIntoView({ behavior: 'smooth' })
-        }
-      })
-    })
+    // One-shot hero animation
+    (function () {
+      const word    = document.getElementById('hero-word');
+      const teaches = document.getElementById('hero-teaches');
+      const overlay = document.getElementById('hero-ov');
+      const spinner = document.getElementById('hero-ov-spinner');
+      const card    = document.getElementById('hero-ov-card');
+      if (!word || !teaches || !overlay) return;
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        word.textContent = 'corrects';
+        word.classList.remove('typing');
+        word.classList.add('corrected');
+        teaches.classList.add('visible');
+        overlay.style.display = 'none';
+        return;
+      }
+
+      const target = 'corrects';
+      const typeStart = 500;
+      const typeSpeed = 95;
+
+      // Typewriter effect
+      for (let i = 1; i <= target.length; i++) {
+        setTimeout(() => { word.textContent = target.slice(0, i); }, typeStart + i * typeSpeed);
+      }
+
+      const t0 = typeStart + target.length * typeSpeed + 350;
+      setTimeout(() => word.classList.remove('typing'), t0);
+      setTimeout(() => overlay.classList.add('visible'), t0 + 200);
+      setTimeout(() => {
+        spinner.classList.add('hidden');
+        card.classList.add('visible');
+      }, t0 + 1100);
+      setTimeout(() => {
+        word.classList.add('corrected');
+        teaches.classList.add('visible');
+      }, t0 + 1900);
+      setTimeout(() => overlay.classList.remove('visible'), t0 + 3000);
+      setTimeout(() => { overlay.style.display = 'none'; }, t0 + 3400);
+    })();
+
+    // Scroll reveal — fade-up sections + stagger grids
+    (function () {
+      const targets = document.querySelectorAll('.reveal, .reveal-stagger');
+      if (!targets.length) return;
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+        targets.forEach(el => el.classList.add('in'));
+        return;
+      }
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+      targets.forEach(el => io.observe(el));
+    })();
   </script>
-
 </body>
 </html>

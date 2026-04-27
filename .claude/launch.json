@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Extension (plasmo dev)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 1012
+    },
+    {
+      "name": "Landing page",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "serve:landing"],
+      "port": 3000
+    },
+    {
+      "name": "Design canvas",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "serve:canvas"],
+      "port": 3001
+    }
+  ]
+}
