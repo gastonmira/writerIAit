@@ -2,7 +2,21 @@
 
 A Chrome extension that corrects English grammar for non-native speakers — and explains *why* each correction was made.
 
-Designed for Spanish/Portuguese-speaking professionals writing emails, Slack messages, and GitHub comments. Feels like a code review, not a spell checker.
+Designed for non-native English-speaking professionals writing emails, Slack messages, and GitHub comments. Feels like a code review, not a spell checker.
+
+**Live landing:** [writeraiit.pages.dev](https://writeraiit.pages.dev/)
+
+---
+
+## Why I built it
+
+Most grammar tools tell you what to change. writerIAit also tells you why.
+
+I also built it for a very practical reason: I was not going to pay for the competing tool. So I thought, "fine, I'll build my own."
+
+The goal is not to replace your writing voice or silently rewrite everything. The goal is to help non-native English speakers improve the text they are writing right now, learn the grammar rule behind each correction, and stay in control of every change.
+
+writerIAit is free, open source, and bring-your-own-API-key. There is no backend, no subscription, and no telemetry.
 
 ---
 
@@ -19,6 +33,46 @@ Designed for Spanish/Portuguese-speaking professionals writing emails, Slack mes
 - **Undo toast** — one-click undo after accepting corrections
 - **Four LLM backends** — OpenAI, Anthropic, Gemini (free), Groq (free)
 - **Privacy-first** — text is sent only to your chosen API provider; no servers in between
+
+---
+
+## How it works
+
+1. Focus a text field in Chrome.
+2. Press `Cmd+Shift+K` / `Ctrl+Shift+K`.
+3. writerIAit locks the field while checking the text, then shows a correction overlay.
+4. Review the diff and the Teaching Mode explanation for each correction.
+5. Accept, reject, or undo changes.
+
+The extension runs only when you ask it to. It does not scan pages in the background.
+
+---
+
+## Privacy model
+
+writerIAit does not run a server.
+
+- Your API key is stored locally in `chrome.storage.local`.
+- Provider preferences and native language are stored in `chrome.storage.sync`.
+- Your text is sent directly from Chrome to the LLM provider you choose.
+- writerIAit does not store prompts, corrections, telemetry, or analytics.
+
+See the landing privacy page: [writeraiit.pages.dev/privacy](https://writeraiit.pages.dev/privacy).
+
+---
+
+## Project status
+
+This is an early open-source project, not a Chrome Web Store product yet.
+
+It is also my first open-source project, so please be patient with rough edges. If you spot a bug, confusing behavior, or something that could be improved, feel free to open an issue or send a pull request.
+
+Current status:
+
+- Manual install from source is supported.
+- Gemini and Groq can be used with free API keys.
+- The extension works across plain text fields and rich text editors such as Gmail, LinkedIn, Notion, and GitHub.
+- Issues and pull requests are welcome.
 
 ---
 
