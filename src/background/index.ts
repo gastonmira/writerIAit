@@ -2,6 +2,8 @@
 // Handles: keyboard command relay, LLM fetch (OpenAI + Anthropic), cancellation
 
 import { buildSystemPrompt, parseLLMResponse } from "../core/corrector"
+import { CATEGORIES, isCategory } from "../core/categories"
+import { updateEntryCategory } from "../core/storage-schema"
 import type { CheckTextMessage, CheckTextResponse, LLMProvider } from "../types"
 
 // ─── Error mapping ────────────────────────────────────────────────────────
@@ -73,9 +75,52 @@ chrome.runtime.onMessage.addListener(
       return true // keep channel open for async sendResponse
     }
 
+    if (message.type === "TAG_CORRECTION") {
+      // Fire-and-forget: refines the regex-set category via the user's LLM.
+      handleTagCorrection(message.id, message.reason).catch(() => {})
+      sendResponse({})
+      return false
+    }
+
     return false
   }
 )
+
+// ─── Async category refinement ────────────────────────────────────────────
+// Called in the background after a correction is accepted. Never blocks UI.
+// On any failure (no key, 401, 429, network, invalid label) the regex
+// category set at insert time persists.
+
+// Pure: normalizes the LLM's free-form reply and validates it against the
+// closed set. Returns null when the response can't be mapped — the caller
+// keeps the regex category in that case.
+export function parseTagResponse(raw: string): import("../core/categories").Category | null {
+  const label = raw.toLowerCase().trim().replace(/[."'`]/g, "")
+  return isCategory(label) ? label : null
+}
+
+async function handleTagCorrection(id: string, reason: string): Promise<void> {
+  const [{ provider }, { apiKey }] = await Promise.all([
+    chrome.storage.sync.get(["provider"]),
+    chrome.storage.local.get(["apiKey"]),
+  ])
+  if (!provider || !apiKey) return
+
+  const prompt = `Classify this English grammar correction reason into exactly one of: ${CATEGORIES.join(", ")}. Reply with ONLY the label, no quotes, no explanation.`
+  try {
+    const raw = await fetchLLM(
+      provider as LLMProvider,
+      apiKey as string,
+      prompt,
+      reason,
+      new AbortController().signal,
+    )
+    const label = parseTagResponse(raw)
+    if (label) await updateEntryCategory(id, label)
+  } catch {
+    // Silent: regex category persists.
+  }
+}
 
 // ─── LLM fetch ─────────────────────────────────────────────────────────────
 

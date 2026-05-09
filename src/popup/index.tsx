@@ -2,7 +2,11 @@
 // React component, CSS custom properties for all design tokens
 
 import { useEffect, useState } from "react"
+import Insights from "./insights"
+import { migrateLegacyReasons } from "../core/storage-schema"
 import type { CheckMode, CorrectionView, LLMProvider, RewriteIntent } from "../types"
+
+type PopupTab = "settings" | "insights"
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 
@@ -359,6 +363,36 @@ const ROOT_STYLE = `
     font-style: italic;
     color: var(--muted);
   }
+
+  /* ─── Tab nav ─────────────────────────────────────────────────────────── */
+
+  .tab-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 4px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+
+  .tab-btn:hover {
+    color: var(--text-primary);
+  }
+
+  .tab-btn.selected {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
 `
 
 // ─── Provider metadata ──────────────────────────────────────────────────────
@@ -384,8 +418,6 @@ function getShortcutLabel(): string {
 
 // ─── Popup component ───────────────────────────────────────────────────────
 
-type WeekStats = { count: number; topFix: string | null }
-
 export default function Popup() {
   const [nativeLanguage, setNativeLanguage] = useState("Spanish")
   const [apiKey, setApiKey] = useState("")
@@ -394,7 +426,6 @@ export default function Popup() {
   const [rewriteIntent, setRewriteIntent] = useState<RewriteIntent>("professional")
   const [correctionView, setCorrectionView] = useState<CorrectionView>("inline")
   const [showFloatingButton, setShowFloatingButton] = useState(true)
-  const [stats, setStats] = useState<WeekStats>({ count: 0, topFix: null })
   const [saved, setSaved] = useState(false)
 
   // Onboarding state
@@ -402,26 +433,34 @@ export default function Popup() {
   const [onboardingStep, setOnboardingStep] = useState<1 | 2 | 3>(1)
   const [keyError, setKeyError] = useState("")
 
+  // Tab nav (Settings | Insights)
+  const [popupTab, setPopupTab] = useState<PopupTab>("settings")
+
   // Load saved settings + check onboarding flag
   useEffect(() => {
-    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent", "correctionView", "showFloatingButton"]).then(res => {
+    // Idempotent — runs once per popup mount; overlay does the same on its side.
+    migrateLegacyReasons().catch(() => {})
+
+    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent", "correctionView", "showFloatingButton", "popupTab"]).then(res => {
       if (res.nativeLanguage) setNativeLanguage(res.nativeLanguage)
       if (res.provider) setProvider(res.provider as LLMProvider)
       if (res.checkMode) setCheckMode(res.checkMode as CheckMode)
       if (res.rewriteIntent) setRewriteIntent(res.rewriteIntent as RewriteIntent)
       if (res.correctionView) setCorrectionView(res.correctionView as CorrectionView)
       if (typeof res.showFloatingButton === "boolean") setShowFloatingButton(res.showFloatingButton)
+      if (res.popupTab === "insights" || res.popupTab === "settings") setPopupTab(res.popupTab)
     })
-    chrome.storage.local.get(["apiKey", "correctionsThisWeek", "weekStart", "reasons", "hasOnboarded"]).then(res => {
+    chrome.storage.local.get(["apiKey", "hasOnboarded"]).then(res => {
       if (res.apiKey) setApiKey(res.apiKey)
-      const count = res.correctionsThisWeek ?? 0
-      const reasons: string[] = res.reasons ?? []
-      const topFix = getTopFix(reasons)
-      setStats({ count, topFix })
       setHasOnboarded(!!res.hasOnboarded)
       if (!res.hasOnboarded) setOnboardingStep(1)
     })
   }, [])
+
+  function handleTabChange(tab: PopupTab) {
+    setPopupTab(tab)
+    chrome.storage.sync.set({ popupTab: tab })
+  }
 
   // ── Settings handlers ──────────────────────────────────────────────────
 
@@ -660,9 +699,25 @@ export default function Popup() {
 
       {Header}
 
+      <div className="tab-nav">
+        <button
+          className={`tab-btn${popupTab === "settings" ? " selected" : ""}`}
+          onClick={() => handleTabChange("settings")}
+        >
+          Settings
+        </button>
+        <button
+          className={`tab-btn${popupTab === "insights" ? " selected" : ""}`}
+          onClick={() => handleTabChange("insights")}
+        >
+          Insights
+        </button>
+      </div>
+
       <div id="popup-scroll">
 
-      <div className="divider" />
+      {popupTab === "insights" ? <Insights /> : (
+      <>
 
       {/* Preferences */}
       <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
@@ -771,53 +826,6 @@ export default function Popup() {
 
       <div className="divider" />
 
-      {/* This Week stats */}
-      <div style={{ padding: "14px 16px" }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 12
-        }}>
-          <div style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-md)",
-            padding: "10px 12px"
-          }}>
-            <div style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
-              {stats.count}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>
-              Corrections this week
-            </div>
-          </div>
-
-          <div style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-md)",
-            padding: "10px 12px"
-          }}>
-            {stats.topFix ? (
-              <>
-                <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)", wordBreak: "break-word" }}>
-                  {stats.topFix}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>
-                  Top fix
-                </div>
-              </>
-            ) : (
-              <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                No corrections yet this week.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="divider" />
-
       {/* Utility */}
       <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
         <div>
@@ -885,6 +893,9 @@ export default function Popup() {
         </div>
       </div>
 
+      </>
+      )}
+
       </div>{/* end #popup-scroll */}
     </div>
   )
@@ -899,17 +910,3 @@ function getApiKeyPlaceholder(provider: LLMProvider): string {
   return "gsk_…" // Groq
 }
 
-function getTopFix(reasons: string[]): string | null {
-  if (!reasons.length) return null
-  const counts = new Map<string, number>()
-  for (const r of reasons) {
-    const key = r.split(/\s+/).slice(0, 3).join(" ")
-    counts.set(key, (counts.get(key) ?? 0) + 1)
-  }
-  let top = ""
-  let max = 0
-  for (const [key, count] of counts) {
-    if (count > max) { max = count; top = key }
-  }
-  return top || null
-}
