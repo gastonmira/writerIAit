@@ -354,3 +354,60 @@ describe("floating button toggle", () => {
     expect(sync.showFloatingButton).toBe(true)
   })
 })
+
+// ─── Tab nav (Settings / Insights) ─────────────────────────────────────────
+
+describe("popup tab nav", () => {
+  it("renders both tabs in the normal view", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    render(<Popup />)
+    await waitFor(() => screen.getByRole("button", { name: /^settings$/i }))
+
+    expect(screen.getByRole("button", { name: /^settings$/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /^insights$/i })).toBeInTheDocument()
+  })
+
+  it("defaults to the Settings tab on first load", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    render(<Popup />)
+    await waitFor(() => screen.getByRole("button", { name: /^settings$/i }))
+
+    expect(screen.getByRole("button", { name: /^settings$/i })).toHaveClass("selected")
+    expect(screen.getByRole("button", { name: /^insights$/i })).not.toHaveClass("selected")
+    // Settings content visible
+    expect(screen.getByText(/native language/i)).toBeInTheDocument()
+  })
+
+  it("restores the last-selected tab from chrome.storage.sync on mount", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    await chrome.storage.sync.set({ popupTab: "insights" })
+    render(<Popup />)
+    await waitFor(() => screen.getByRole("button", { name: /^insights$/i }))
+
+    expect(screen.getByRole("button", { name: /^insights$/i })).toHaveClass("selected")
+    // Insights content visible (window-toggle label)
+    expect(screen.getByText(/time window/i)).toBeInTheDocument()
+  })
+
+  it("clicking a tab persists the choice to chrome.storage.sync", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    const user = userEvent.setup()
+    render(<Popup />)
+    await waitFor(() => screen.getByRole("button", { name: /^insights$/i }))
+
+    await user.click(screen.getByRole("button", { name: /^insights$/i }))
+
+    const sync = await chrome.storage.sync.get(["popupTab"])
+    expect(sync.popupTab).toBe("insights")
+    expect(screen.getByRole("button", { name: /^insights$/i })).toHaveClass("selected")
+  })
+
+  it("ignores invalid popupTab values in storage and falls back to Settings", async () => {
+    await chrome.storage.local.set({ hasOnboarded: true })
+    await chrome.storage.sync.set({ popupTab: "garbage-tab-name" })
+    render(<Popup />)
+    await waitFor(() => screen.getByRole("button", { name: /^settings$/i }))
+
+    expect(screen.getByRole("button", { name: /^settings$/i })).toHaveClass("selected")
+  })
+})

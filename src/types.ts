@@ -23,3 +23,12 @@ export interface CheckTextMessage {
 export type CheckTextResponse =
   | { corrections: Correction[] }
   | { error: string }
+
+export type { Category } from "./core/categories"
+export type { CorrectionEntry } from "./core/storage-schema"
+
+export interface TagCorrectionMessage {
+  type: "TAG_CORRECTION"
+  id: string
+  reason: string
+}

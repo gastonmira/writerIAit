@@ -11,11 +11,17 @@ const makeStorage = (store: Record<string, unknown>) => ({
   get: (keys: string | string[]) => {
     const ks = Array.isArray(keys) ? keys : [keys]
     const result: Record<string, unknown> = {}
-    for (const k of ks) result[k] = store[k]
+    // Match real chrome.storage behavior: only include keys that are present.
+    for (const k of ks) if (k in store) result[k] = store[k]
     return Promise.resolve(result)
   },
   set: (items: Record<string, unknown>) => {
     Object.assign(store, items)
+    return Promise.resolve()
+  },
+  remove: (keys: string | string[]) => {
+    const ks = Array.isArray(keys) ? keys : [keys]
+    for (const k of ks) delete store[k]
     return Promise.resolve()
   },
 })

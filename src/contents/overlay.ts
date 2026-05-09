@@ -3,6 +3,7 @@
 
 import type { PlasmoCSConfig } from "plasmo"
 import { applyCorrections, buildDiffHtml } from "../core/corrector"
+import { recordCorrection, migrateLegacyReasons } from "../core/storage-schema"
 import type { CheckTextMessage, CheckTextResponse, Correction, CheckMode, CorrectionView, RewriteIntent } from "../types"
 
 export const config: PlasmoCSConfig = {
@@ -1206,24 +1207,20 @@ function renderInlineDiff(
 
 // ─── Correction stats ──────────────────────────────────────────────────────
 
-async function recordStats(corrections: Correction[]): Promise<void> {
+async function recordStats(corrections: Correction[], mode: CheckMode): Promise<void> {
   try {
-    const now = Date.now()
-    const weekMs = 7 * 24 * 60 * 60 * 1000
-    const stored = await chrome.storage.local.get(["correctionsThisWeek", "weekStart", "reasons"])
-    let count: number = stored.correctionsThisWeek ?? 0
-    let weekStart: number = stored.weekStart ?? now
-    const reasons: string[] = stored.reasons ?? []
-
-    if (now - weekStart > weekMs) {
-      count = 0
-      weekStart = now
+    let host: string | undefined
+    try { host = location.hostname || undefined } catch { /* sandbox / about: pages */ }
+    for (const c of corrections) {
+      const entry = await recordCorrection(c.reason, mode, host)
+      // Fire-and-forget: ask the background to refine the category via the user's LLM.
+      // No-op when no key is set or the call fails.
+      chrome.runtime.sendMessage({
+        type: "TAG_CORRECTION",
+        id: entry.id,
+        reason: c.reason,
+      }).catch(() => {})
     }
-
-    count += corrections.length
-    for (const c of corrections) reasons.push(c.reason)
-
-    await chrome.storage.local.set({ correctionsThisWeek: count, weekStart, reasons })
   } catch {
     // Non-critical — ignore storage errors
   }
@@ -1616,7 +1613,7 @@ async function handleTrigger(): Promise<void> {
               replaceTextInContentEditable(el, c.original, c.replacement)
             }
           }
-          recordStats(corrections)
+          recordStats(corrections, checkMode)
           showUndoToast(el, text, el, iframeRect, htmlSnapshot)
         },
         () => {
@@ -1661,7 +1658,7 @@ async function handleTrigger(): Promise<void> {
             el.focus()
             replaceTextInContentEditable(el, c.original, c.replacement)
           }
-          recordStats([c])
+          recordStats([c], checkMode)
         },
         () => {
           lastCheckCache = null
@@ -1677,7 +1674,7 @@ async function handleTrigger(): Promise<void> {
               replaceTextInContentEditable(el, c.original, c.replacement)
             }
           }
-          recordStats(corrections)
+          recordStats(corrections, checkMode)
           showUndoToast(el, text, el, iframeRect, htmlSnapshot)
         },
         onDismissWithToast,
@@ -1755,6 +1752,11 @@ chrome.runtime.onMessage.addListener((message) => {
     })
   }
 })
+
+// ─── One-shot legacy stats migration ─────────────────────────────────────
+// Idempotent. Also called from popup mount; whichever runs first migrates.
+
+migrateLegacyReasons().catch(() => {})
 
 // ─── Floating button preference (load + react to changes) ─────────────────
 
