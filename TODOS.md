@@ -12,11 +12,25 @@ Playwright suite covers correction flow basics but is missing:
 
 ## Content Script / Overlay
 
-### P1 — Refactor `overlay.ts` (1,516 lines — needs splitting)
+### P1 — Refactor `overlay.ts` (1,786 lines — needs splitting)
 The file has grown into a monolith. Everything lives in one file: CSS (~300 lines),
 DOM rendering for 6 UI states (loading, carousel, inline diff, looks good, error, undo toast),
 contenteditable replacement logic, iframe piercing, focus tracking, tone detection, and the
 main trigger handler. Specific concerns:
+
+> **2026-05-10 — Forcing function.** The `passive_local_highlighter` feature
+> (#8, feat/passive-local-highlighter) was the first new feature where this
+> debt forced an architectural call. We shipped the passive checker as a
+> **separate content-script entry** (`src/contents/passive-highlighter.ts`)
+> instead of folding it into `overlay.ts`, because the monolith was already
+> too risky to extend with a 300-line live-DOM feature. The split worked out
+> (free lazy-loading via dynamic import, two isolated content scripts that
+> coordinate via a single DOM attribute), but it's a pattern, not a plan:
+> the next feature that needs to live next to the trigger flow (e.g.
+> error-highlighting-in-place) will have the same problem and won't have
+> the same escape hatch. **Bumped from "P1 someday" to "P1 next refactor
+> window."**
+
 
 - **CSS blob** (~300 lines, `SHADOW_CSS` string at top) — extract to `overlay.css` or a
   dedicated `src/contents/overlay-styles.ts` module

@@ -29,3 +29,27 @@ describe("extension manifest permissions", () => {
     }
   })
 })
+
+// ─── Passive highlighter manifest contract (AC12 + WAR) ────────────────────
+
+describe("extension manifest — passive highlighter contract", () => {
+  const manifest = pkg.manifest as Record<string, unknown>
+
+  it("does NOT declare content_security_policy (AC12)", () => {
+    // Passive mode uses nspell — pure JS, no WASM. Adding a CSP key would
+    // either be a no-op or invite future regressions. The spec is explicit:
+    // built manifest must contain no content_security_policy key.
+    expect(manifest.content_security_policy).toBeUndefined()
+  })
+
+  it("declares web_accessible_resources for the bundled dictionaries", () => {
+    const war = manifest.web_accessible_resources as Array<{
+      resources: string[]
+      matches: string[]
+    }>
+    expect(Array.isArray(war)).toBe(true)
+    const dictEntry = war.find((e) => e.resources?.includes("dictionaries/*"))
+    expect(dictEntry).toBeDefined()
+    expect(dictEntry?.matches).toContain("<all_urls>")
+  })
+})

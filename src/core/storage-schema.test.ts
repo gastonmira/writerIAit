@@ -9,6 +9,8 @@ import {
   migrateLegacyReasons,
   computeInsights,
   getEntries,
+  incrementAutoFix,
+  getAutoFixesCount,
   type CorrectionEntry,
 } from "./storage-schema"
 
@@ -369,5 +371,46 @@ describe("getEntries", () => {
     const all = await getEntries()
     expect(all).toHaveLength(1)
     expect(all[0].id).toBe(e.id)
+  })
+})
+
+// ─── incrementAutoFix / getAutoFixesCount (AC7 stats isolation) ────────────
+
+describe("incrementAutoFix", () => {
+  it("returns 1 when the counter is absent", async () => {
+    expect(await incrementAutoFix()).toBe(1)
+  })
+
+  it("bumps by 1 on each call", async () => {
+    expect(await incrementAutoFix()).toBe(1)
+    expect(await incrementAutoFix()).toBe(2)
+    expect(await incrementAutoFix()).toBe(3)
+  })
+
+  it("persists to chrome.storage.local under the autoFixesCount key", async () => {
+    await incrementAutoFix()
+    await incrementAutoFix()
+    const stored = await chrome.storage.local.get("autoFixesCount")
+    expect(stored.autoFixesCount).toBe(2)
+  })
+
+  it("does NOT touch the corrections array (AC7 stats isolation)", async () => {
+    await recordCorrection("Missing article", "correct")
+    const before = await getEntries()
+    await incrementAutoFix()
+    await incrementAutoFix()
+    const after = await getEntries()
+    expect(after).toEqual(before)
+  })
+})
+
+describe("getAutoFixesCount", () => {
+  it("returns 0 when the counter is absent", async () => {
+    expect(await getAutoFixesCount()).toBe(0)
+  })
+
+  it("returns the stored value", async () => {
+    await chrome.storage.local.set({ autoFixesCount: 42 })
+    expect(await getAutoFixesCount()).toBe(42)
   })
 })

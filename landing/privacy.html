@@ -106,6 +106,9 @@
     <h2>What data the extension handles</h2>
     <p>When you trigger a correction (using the keyboard shortcut <code>Ctrl+Shift+K</code> / <code>Cmd+Shift+K</code> or the floating button next to the focused text field), the extension reads the current contents of that field and sends it directly from your browser to the LLM provider you have configured.</p>
 
+    <h3>Passive mode (optional)</h3>
+    <p>If you enable <em>Highlight typos as I type</em> in Preferences, the extension runs an English spelling check entirely inside your browser. The dictionary and the spell-checker are bundled with the extension itself; no part of your text is sent to any server — not to an LLM provider, not to us, not to anyone. Typo fixes accepted in passive mode are counted locally (in <code>chrome.storage.local</code> as <code>autoFixesCount</code>) and never contribute to the Insights dashboard&rsquo;s pattern analysis, which remains driven by your AI corrections only.</p>
+
     <h3>Data sent to the selected LLM provider</h3>
     <ul>
       <li>The text contained in the focused field at the time of the request.</li>

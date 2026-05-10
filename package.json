@@ -7,7 +7,7 @@
   "scripts": {
     "predev": "node scripts/predev.js",
     "dev": "plasmo dev",
-    "build": "plasmo build && cp -r _locales build/chrome-mv3-prod/ && cp public/*.png build/chrome-mv3-prod/",
+    "build": "plasmo build && cp -r _locales build/chrome-mv3-prod/ && cp public/*.png build/chrome-mv3-prod/ && cp -r public/dictionaries build/chrome-mv3-prod/",
     "serve:landing": "npx http-server landing -p 3000 --cors -c-1",
     "serve:canvas": "npx http-server landing/landings -p 3001 --cors",
     "test": "vitest run",
@@ -17,6 +17,7 @@
     "test:e2e:cross": "playwright test cross-site-agent"
   },
   "dependencies": {
+    "nspell": "^2.1.5",
     "plasmo": "0.90.5",
     "react": "18.3.1",
     "react-dom": "18.3.1"
@@ -49,6 +50,9 @@
     "permissions": [
       "storage",
       "activeTab"
+    ],
+    "web_accessible_resources": [
+      { "resources": ["dictionaries/*"], "matches": ["<all_urls>"] }
     ],
     "default_locale": "en"
   },
