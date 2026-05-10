@@ -34,6 +34,7 @@ const makeStorage = (store: Record<string, unknown>) => ({
   },
   runtime: {
     getManifest: () => ({ version: "0.1.0" }),
+    getURL: (path: string) => `chrome-extension://test/${path}`,
     onMessage: { addListener: vi.fn(), removeListener: vi.fn() },
     sendMessage: vi.fn().mockResolvedValue({ corrections: [] }),
   },
@@ -47,6 +48,16 @@ const makeStorage = (store: Record<string, unknown>) => ({
   commands: {
     onCommand: { addListener: vi.fn(), removeListener: vi.fn() },
   },
+}
+
+// jsdom doesn't ship ResizeObserver — the passive highlighter uses one to
+// re-render decorations when the field resizes. Minimal noop stub.
+if (typeof globalThis.ResizeObserver === "undefined") {
+  ;(globalThis as unknown as Record<string, unknown>).ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
 }
 
 // Reset stores between tests

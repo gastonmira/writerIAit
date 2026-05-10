@@ -1,7 +1,7 @@
 // popup/index.test.tsx — component tests for the onboarding wizard
 // Uses React Testing Library + jsdom + chrome API mock (see src/test-setup.ts)
 
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, it, expect } from "vitest"
 import Popup from "./index"
@@ -307,13 +307,22 @@ describe("normal settings view", () => {
 // ─── Floating button toggle ────────────────────────────────────────────────
 
 describe("floating button toggle", () => {
+  // Scope queries to the floating-button row — passive mode adds another
+  // On/Off mode-strip with the same accessible names.
+  function floatingRow(): HTMLElement {
+    const label = screen.getByText(/floating button/i)
+    const row = label.parentElement
+    if (!row) throw new Error("floating button row not found")
+    return row
+  }
+
   it("renders the toggle in the normal settings view, defaulting to On", async () => {
     await chrome.storage.local.set({ hasOnboarded: true })
     render(<Popup />)
     await waitFor(() => screen.getByText(/floating button/i))
 
-    const onBtn = screen.getByRole("button", { name: "On" })
-    const offBtn = screen.getByRole("button", { name: "Off" })
+    const onBtn = within(floatingRow()).getByRole("button", { name: "On" })
+    const offBtn = within(floatingRow()).getByRole("button", { name: "Off" })
     expect(onBtn).toHaveClass("selected")
     expect(offBtn).not.toHaveClass("selected")
   })
@@ -324,11 +333,11 @@ describe("floating button toggle", () => {
     render(<Popup />)
     await waitFor(() => screen.getByText(/floating button/i))
 
-    await user.click(screen.getByRole("button", { name: "Off" }))
+    await user.click(within(floatingRow()).getByRole("button", { name: "Off" }))
 
     const sync = await chrome.storage.sync.get(["showFloatingButton"])
     expect(sync.showFloatingButton).toBe(false)
-    expect(screen.getByRole("button", { name: "Off" })).toHaveClass("selected")
+    expect(within(floatingRow()).getByRole("button", { name: "Off" })).toHaveClass("selected")
   })
 
   it("loads showFloatingButton from sync storage on mount", async () => {
@@ -337,8 +346,8 @@ describe("floating button toggle", () => {
     render(<Popup />)
     await waitFor(() => screen.getByText(/floating button/i))
 
-    expect(screen.getByRole("button", { name: "Off" })).toHaveClass("selected")
-    expect(screen.getByRole("button", { name: "On" })).not.toHaveClass("selected")
+    expect(within(floatingRow()).getByRole("button", { name: "Off" })).toHaveClass("selected")
+    expect(within(floatingRow()).getByRole("button", { name: "On" })).not.toHaveClass("selected")
   })
 
   it("clicking On after Off restores the preference", async () => {
@@ -348,7 +357,7 @@ describe("floating button toggle", () => {
     render(<Popup />)
     await waitFor(() => screen.getByText(/floating button/i))
 
-    await user.click(screen.getByRole("button", { name: "On" }))
+    await user.click(within(floatingRow()).getByRole("button", { name: "On" }))
 
     const sync = await chrome.storage.sync.get(["showFloatingButton"])
     expect(sync.showFloatingButton).toBe(true)

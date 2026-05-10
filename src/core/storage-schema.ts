@@ -22,6 +22,7 @@ export interface Insights {
 
 const STORAGE_KEY = "corrections"
 const MAX_ENTRIES = 1000
+const AUTO_FIXES_KEY = "autoFixesCount"
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const WEEK_MS = 7 * DAY_MS
@@ -157,4 +158,23 @@ function computeStreak(entries: CorrectionEntry[], now: number): number {
     cursor.setDate(cursor.getDate() - 1)
   }
   return streak
+}
+
+// ─── Passive auto-fix counter (separate from LLM corrections) ───────────────
+// Intentionally NOT a CorrectionEntry. Passive typo fixes do not participate
+// in the Insights dashboard's pattern detection — see the coordination
+// decisions on PR #15. Stored under a distinct local key so they cannot be
+// confused with or accidentally rolled into `corrections`.
+
+export async function incrementAutoFix(): Promise<number> {
+  const stored = await chrome.storage.local.get(AUTO_FIXES_KEY)
+  const current = typeof stored[AUTO_FIXES_KEY] === "number" ? stored[AUTO_FIXES_KEY] : 0
+  const next = current + 1
+  await chrome.storage.local.set({ [AUTO_FIXES_KEY]: next })
+  return next
+}
+
+export async function getAutoFixesCount(): Promise<number> {
+  const stored = await chrome.storage.local.get(AUTO_FIXES_KEY)
+  return typeof stored[AUTO_FIXES_KEY] === "number" ? stored[AUTO_FIXES_KEY] : 0
 }

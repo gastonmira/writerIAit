@@ -349,6 +349,27 @@ let lockedElement: HTMLElement | null = null
 let originalReadOnly: boolean | null = null
 let originalContentEditable: string | null = null
 
+// Coexistence handshake with src/contents/passive-highlighter.ts.
+// While the deep-check overlay is active on a field, that field carries
+// data-writeai-deep-active="1" so the passive highlighter hides its
+// decorations there. Cleared by removeOverlay().
+let deepActiveField: HTMLElement | null = null
+
+function markDeepActive(el: HTMLElement): void {
+  if (deepActiveField && deepActiveField !== el) {
+    deepActiveField.removeAttribute("data-writeai-deep-active")
+  }
+  deepActiveField = el
+  el.setAttribute("data-writeai-deep-active", "1")
+}
+
+function clearDeepActive(): void {
+  if (deepActiveField) {
+    deepActiveField.removeAttribute("data-writeai-deep-active")
+    deepActiveField = null
+  }
+}
+
 function lockElement(el: HTMLElement): void {
   lockedElement = el
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
@@ -706,6 +727,7 @@ function removeOverlay(): void {
     document.removeEventListener("keydown", keyboardHandler)
     keyboardHandler = null
   }
+  clearDeepActive()
 }
 
 function removeToast(): void {
@@ -1510,6 +1532,7 @@ async function handleTrigger(): Promise<void> {
     return
   }
 
+  markDeepActive(el)
   lockElement(el)
   const root = getOrCreateHost(el, iframeRect)
 

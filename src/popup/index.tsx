@@ -426,6 +426,7 @@ export default function Popup() {
   const [rewriteIntent, setRewriteIntent] = useState<RewriteIntent>("professional")
   const [correctionView, setCorrectionView] = useState<CorrectionView>("inline")
   const [showFloatingButton, setShowFloatingButton] = useState(true)
+  const [passiveMode, setPassiveMode] = useState(false)
   const [saved, setSaved] = useState(false)
 
   // Onboarding state
@@ -441,13 +442,14 @@ export default function Popup() {
     // Idempotent — runs once per popup mount; overlay does the same on its side.
     migrateLegacyReasons().catch(() => {})
 
-    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent", "correctionView", "showFloatingButton", "popupTab"]).then(res => {
+    chrome.storage.sync.get(["nativeLanguage", "provider", "checkMode", "rewriteIntent", "correctionView", "showFloatingButton", "passiveMode", "popupTab"]).then(res => {
       if (res.nativeLanguage) setNativeLanguage(res.nativeLanguage)
       if (res.provider) setProvider(res.provider as LLMProvider)
       if (res.checkMode) setCheckMode(res.checkMode as CheckMode)
       if (res.rewriteIntent) setRewriteIntent(res.rewriteIntent as RewriteIntent)
       if (res.correctionView) setCorrectionView(res.correctionView as CorrectionView)
       if (typeof res.showFloatingButton === "boolean") setShowFloatingButton(res.showFloatingButton)
+      if (typeof res.passiveMode === "boolean") setPassiveMode(res.passiveMode)
       if (res.popupTab === "insights" || res.popupTab === "settings") setPopupTab(res.popupTab)
     })
     chrome.storage.local.get(["apiKey", "hasOnboarded"]).then(res => {
@@ -475,6 +477,10 @@ export default function Popup() {
   function handleFloatingButtonChange(val: boolean) {
     setShowFloatingButton(val)
     chrome.storage.sync.set({ showFloatingButton: val })
+  }
+  function handlePassiveModeChange(val: boolean) {
+    setPassiveMode(val)
+    chrome.storage.sync.set({ passiveMode: val })
   }
   function handleRewriteIntentChange(val: RewriteIntent) {
     setRewriteIntent(val)
@@ -677,6 +683,25 @@ export default function Popup() {
                 </div>
               </div>
 
+              {!passiveMode && (
+                <div className="shortcut-callout" style={{ borderColor: "var(--accent)" }}>
+                  <div className="shortcut-callout-label">Optional</div>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>
+                    Highlight typos as you type
+                  </div>
+                  <div className="shortcut-callout-helper">
+                    100% local · no LLM call · no token cost.
+                  </div>
+                  <button
+                    className="btn-primary"
+                    style={{ marginTop: 4 }}
+                    onClick={() => handlePassiveModeChange(true)}
+                  >
+                    Enable passive mode
+                  </button>
+                </div>
+              )}
+
               <div className="teaching-note">
                 Teaching Mode is always on — every correction includes an explanation of why.
               </div>
@@ -804,6 +829,24 @@ export default function Popup() {
           </div>
           <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 5 }}>
             Shows a small W button next to the focused text field. The keyboard shortcut still works either way.
+          </div>
+        </div>
+
+        <div>
+          <label>Highlight typos as I type</label>
+          <div className="mode-strip">
+            {([ [true, "On"], [false, "Off"] ] as const).map(([v, label]) => (
+              <button
+                key={String(v)}
+                className={`mode-btn${passiveMode === v ? " selected" : ""}`}
+                onClick={() => handlePassiveModeChange(v)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 5 }}>
+            Underlines misspelled words in any text field as you type. 100% local — no LLM call, no token cost.
           </div>
         </div>
 
